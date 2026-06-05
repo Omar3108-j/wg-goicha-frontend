@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
+import { API_URL } from "../../config/api"
 
 function EditProduct() {
   const { id } = useParams()
@@ -21,11 +22,11 @@ function EditProduct() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/categorias")
+    axios.get(`${API_URL}/api/categorias`)
       .then((res) => setCategorias(res.data))
       .catch((err) => console.error("Error cargando categorías:", err))
 
-    axios.get(`http://localhost:8080/api/productos/${id}`)
+    axios.get(`${API_URL}/api/productos/${id}`)
       .then((res) => {
         const prod = res.data
 
@@ -65,14 +66,14 @@ function EditProduct() {
         formData.append("file", imagenNueva)
 
         const uploadRes = await axios.post(
-          "http://localhost:8080/api/upload",
+          `${API_URL}/api/upload`,
           formData
         )
 
         imageUrl = uploadRes.data
       }
 
-      await axios.put(`http://localhost:8080/api/productos/${id}`, {
+      await axios.put(`${API_URL}/api/productos/${id}`, {
         nombre: form.nombre,
         descripcion: form.descripcion,
         tipo: form.tipo,

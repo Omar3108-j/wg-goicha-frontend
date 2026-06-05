@@ -1,3 +1,4 @@
+import { API_URL } from "../config/api"
 function LocationMap() {
   const direccion =
     "AV. GUILLERMO DANSEY NRO. 481 INT. 159, Centro Comercial Loreto, Lima, Perú"

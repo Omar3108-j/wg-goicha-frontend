@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import { API_URL } from "../../config/api"
 import {
   ResponsiveContainer,
   LineChart,
@@ -39,11 +40,11 @@ useEffect(() => {
   ventasRes,
   estadosRes,
 ] = await Promise.all([
-  axios.get("http://localhost:8080/api/productos"),
-  axios.get("http://localhost:8080/api/pedidos"),
-  axios.get("http://localhost:8080/api/cotizaciones"),
-  axios.get("http://localhost:8080/api/dashboard/ventas-mensuales"),
-  axios.get("http://localhost:8080/api/dashboard/estado-pedidos"),
+  axios.get(`${API_URL}/api/productos`),
+  axios.get(`${API_URL}/api/pedidos`),
+  axios.get(`${API_URL}/api/cotizaciones`),
+  axios.get(`${API_URL}/api/dashboard/ventas-mensuales`),
+  axios.get(`${API_URL}/api/dashboard/estado-pedidos`),
 ])
 
 setStats({

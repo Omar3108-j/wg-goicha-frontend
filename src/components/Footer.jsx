@@ -1,4 +1,5 @@
 import { empresa } from "../data/empresa"
+import { API_URL } from "../config/api"
 
 function Footer() {
   const mensaje = "Hola, deseo cotizar productos de tuberías y conexiones."

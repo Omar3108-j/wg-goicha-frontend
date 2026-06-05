@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import { API_URL } from "../../config/api"
 
 function AdminQuotations() {
   const [cotizaciones, setCotizaciones] = useState([])
@@ -31,7 +32,7 @@ function AdminQuotations() {
 
   const cargarCotizaciones = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/cotizaciones")
+      const res = await axios.get(`/api/cotizaciones`)
       setCotizaciones(res.data)
     } catch (error) {
       console.error("Error cargando cotizaciones:", error)
@@ -62,7 +63,7 @@ function AdminQuotations() {
 
   try {
     const res = await axios.get(
-      `http://localhost:8080/api/productos-internos?buscar=${encodeURIComponent(texto)}`
+      `${API_URL}/api/productos-internos?buscar=${encodeURIComponent(texto)}`
     )
 
     setSugerencias({
@@ -316,7 +317,7 @@ if (parecePrecio && tokens.length > 1) {
 
 const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
   try {
-    await axios.put(`http://localhost:8080/api/cotizaciones/${cot.id}`, {
+    await axios.put(`${API_URL}/api/cotizaciones/${cot.id}`, {
       ...cot,
       estado: nuevoEstado,
     })
@@ -377,11 +378,11 @@ Gracias por confiar en W&G Corporación Goicha.`
     try {
       if (cotizacionEditandoId) {
   await axios.put(
-    `http://localhost:8080/api/cotizaciones/${cotizacionEditandoId}`,
+    `${API_URL}/api/cotizaciones/${cotizacionEditandoId}`,
     data
   )
 } else {
-  await axios.post("http://localhost:8080/api/cotizaciones", data)
+  await axios.post(`${API_URL}/api/cotizaciones`, data)
 }
 
       alert("Cotización registrada correctamente")
@@ -671,7 +672,7 @@ Gracias por confiar en W&G Corporación Goicha.`
 
         <div className="quotation-list-actions">
           <a
-            href={`http://localhost:8080/api/cotizaciones/${cot.id}/pdf`}
+            href={`${API_URL}/api/cotizaciones/${cot.id}/pdf`}
             target="_blank"
             rel="noreferrer"
             className="quotation-pdf-button"

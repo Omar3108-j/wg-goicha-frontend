@@ -3,6 +3,7 @@ import axios from "axios"
 import { useReveal } from "../hooks/useReveal"
 import { obtenerProductos } from "../services/productoService"
 import { ShoppingCart } from "lucide-react"
+import { API_URL } from "../config/api"
 
 function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada }) {
   const [prodRef, prodVisible] = useReveal()
@@ -75,7 +76,7 @@ useEffect(() => {
 
 useEffect(() => {
   axios
-    .get("http://localhost:8080/api/categorias")
+    .get(`${API_URL}/api/categorias`)
     .then((res) => setCategorias(res.data))
     .catch((err) => console.error("Error cargando categorías:", err))
 }, [])
@@ -223,7 +224,7 @@ if (form.correo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo)) {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/pedidos", data)
+      const res = await axios.post(`${API_URL}/api/pedidos`, data)
 
       const pedido = res.data
 

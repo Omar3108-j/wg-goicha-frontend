@@ -1,4 +1,5 @@
 import { empresa } from "../data/empresa"
+import { API_URL } from "../config/api"
 
 function WhatsAppButton() {
   const mensaje = `Hola, deseo cotizar productos de tuberías, conexiones y accesorios.`

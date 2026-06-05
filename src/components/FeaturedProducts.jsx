@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { obtenerProductosDestacados } from "../services/productoService"
+import { API_URL } from "../config/api"
 
 function FeaturedProducts() {
   const [productos, setProductos] = useState([])

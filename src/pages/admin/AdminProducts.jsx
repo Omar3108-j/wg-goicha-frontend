@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import { API_URL } from "../../config/api"
 
 function AdminProducts() {
   const [productos, setProductos] = useState([])
@@ -9,7 +10,7 @@ function AdminProducts() {
 
   const cargarProductos = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/productos")
+      const res = await axios.get(`${API_URL}/api/productos`)
       setProductos(res.data)
     } catch (error) {
       console.error("Error cargando productos:", error)
@@ -28,7 +29,7 @@ function AdminProducts() {
     if (!confirmar) return
 
     try {
-      await axios.delete(`http://localhost:8080/api/productos/${id}`)
+      await axios.delete(`${API_URL}/api/productos/${id}`)
       cargarProductos()
     } catch (error) {
       console.error("Error eliminando producto:", error)
@@ -38,7 +39,7 @@ function AdminProducts() {
 
   const cambiarDestacado = async (producto) => {
   try {
-    await axios.put(`http://localhost:8080/api/productos/${producto.id}`, {
+    await axios.put(`/api/productos/${producto.id}`, {
       ...producto,
       destacado: !producto.destacado,
     })

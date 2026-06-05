@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import "../../styles/admin-categories.css"
+import { API_URL } from "../../config/api"
 
 function CategoriasAdmin() {
   const [categorias, setCategorias] = useState([])
@@ -15,7 +16,7 @@ function CategoriasAdmin() {
   })
 
   const cargarCategorias = async () => {
-    const res = await axios.get("http://localhost:8080/api/categorias")
+    const res = await axios.get(`${API_URL}/api/categorias`)
     setCategorias(res.data)
   }
 
@@ -44,7 +45,7 @@ function CategoriasAdmin() {
         formData.append("file", imagen)
 
         const uploadRes = await axios.post(
-          "http://localhost:8080/api/upload",
+          `${API_URL}/api/upload`,
           formData
         )
 
@@ -58,9 +59,9 @@ function CategoriasAdmin() {
       }
 
       if (form.id) {
-        await axios.put(`http://localhost:8080/api/categorias/${form.id}`, payload)
+        await axios.put(`${API_URL}/api/categorias/${form.id}`, payload)
       } else {
-        await axios.post("http://localhost:8080/api/categorias", payload)
+        await axios.post(`${API_URL}/api/categorias`, payload)
       }
 
       await cargarCategorias()
@@ -87,7 +88,7 @@ function CategoriasAdmin() {
     if (!confirm("¿Seguro que deseas eliminar esta categoría?")) return
 
     try {
-      await axios.delete(`http://localhost:8080/api/categorias/${id}`)
+      await axios.delete(`${API_URL}/api/categorias/${id}`)
       await cargarCategorias()
     } catch (error) {
       console.error("Error eliminando categoría:", error)

@@ -4,6 +4,7 @@ import { useReveal } from "../hooks/useReveal"
 
 import hero1 from "../assets/hero/hero1.png"
 import hero2 from "../assets/hero/hero2.jpg"
+import { API_URL } from "../config/api"
 
 function Hero({ whatsappUrl }) {
   const [heroRef, heroVisible] = useReveal()

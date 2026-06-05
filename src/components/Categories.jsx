@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { useReveal } from "../hooks/useReveal"
+import { API_URL } from "../config/api"
 
 function Categories({ whatsappUrl, onSelectCategory }) {
   const [catRef, catVisible] = useReveal()
@@ -9,7 +10,7 @@ function Categories({ whatsappUrl, onSelectCategory }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/api/categorias")
+      .get(`${API_URL}/api/categorias`)
       .then((res) => setCategorias(res.data))
       .catch((err) => console.error("Error cargando categorías:", err))
   }, [])

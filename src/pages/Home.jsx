@@ -12,6 +12,7 @@ import CompanyShowcase from "../components/CompanyShowcase"
 import FeaturedProducts from "../components/FeaturedProducts"
 import Testimonials from "../components/Testimonials"
 import LocationMap from "../components/LocationMap"
+import { API_URL } from "../config/api"
 
 function Home() {
   const mensaje = "Hola, deseo cotizar productos de tuberías y conexiones."

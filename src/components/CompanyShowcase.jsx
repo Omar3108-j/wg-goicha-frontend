@@ -1,5 +1,6 @@
 import tiendaImg from "../assets/empresa/tienda.jpg"
 import movilidadImg from "../assets/empresa/movilidad.jpg"
+import { API_URL } from "../config/api"
 
 function CompanyShowcase() {
   return (

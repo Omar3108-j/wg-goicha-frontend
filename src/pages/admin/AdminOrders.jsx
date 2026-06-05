@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import { API_URL } from "../../config/api"
 
 function AdminOrders() {
   const [pedidos, setPedidos] = useState([])
@@ -8,7 +9,7 @@ function AdminOrders() {
 
   const cargarPedidos = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/pedidos")
+      const res = await axios.get(`${API_URL}/api/pedidos`)
       setPedidos(res.data)
     } catch (error) {
       console.error("Error cargando pedidos:", error)
@@ -23,7 +24,7 @@ function AdminOrders() {
 
   const cambiarEstado = async (id, estado) => {
     try {
-      await axios.put(`http://localhost:8080/api/pedidos/${id}/estado?estado=${estado}`)
+      await axios.put(`${API_URL}/api/pedidos/${id}/estado?estado=${estado}`)
       cargarPedidos()
     } catch (error) {
       console.error("Error actualizando estado:", error)
@@ -122,7 +123,7 @@ function AdminOrders() {
                   Anular
                 </button>
                 <a
-  href={`http://localhost:8080/api/pedidos/${pedido.id}/pdf`}
+  href={`${API_URL}/api/pedidos/${pedido.id}/pdf`}
   target="_blank"
   rel="noreferrer"
   className="admin-order-pdf-button"
