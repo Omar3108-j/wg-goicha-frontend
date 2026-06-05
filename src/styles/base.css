@@ -1,0 +1,32 @@
+#root {
+  width: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #f8f8f6;
+  color: #171717;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.page-main {
+  font-family: "DM Sans", "Segoe UI", sans-serif;
+  background: #f8f8f6;
+}
+
+.section-container {
+  max-width: 1120px;
+  margin: 0 auto;
+}

@@ -1,0 +1,120 @@
+.why-section {
+  padding: 70px 20px 40px;
+  background: linear-gradient(180deg, #050505 0%, #111 100%);
+  color: #fff;
+}
+
+.why-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.why-header {
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.why-header span {
+  color: #ef4444;
+  font-weight: 950;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+}
+
+.why-header h2 {
+  font-size: clamp(28px, 3vw, 48px);
+  max-width: 900px;
+  margin: 10px auto 16px;
+  line-height: 1.1;
+}
+
+.why-header p {
+  margin: 0 auto;
+  max-width: 650px;
+  color: #cfcfcf;
+  line-height: 1.6;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.why-card {
+    min-height: 190px;
+  padding: 26px;
+  border-radius: 26px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 45px rgba(0,0,0,0.22);
+}
+
+.why-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(239,68,68,0.18);
+  margin-bottom: 16px;
+  font-size: 22px;
+}
+
+.why-card h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.why-card p {
+  margin: 0;
+  color: #cfcfcf;
+  line-height: 1.55;
+  font-size: 14px;
+}
+.why-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow:
+    0 25px 60px rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 900px) {
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .why-section {
+    padding: 55px 16px 34px;
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.why-number {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 34px;
+  font-weight: 950;
+  color: #fff;
+  letter-spacing: -1px;
+}
+
+.why-card {
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(239, 68, 68, 0.3);
+  box-shadow: 0 25px 60px rgba(239, 68, 68, 0.15);
+}
+
+.why-icon svg {
+  color: #ef4444;
+  font-size: 22px;
+}

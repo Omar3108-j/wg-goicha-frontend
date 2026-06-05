@@ -1,0 +1,23 @@
+@import "./styles/base.css";
+@import "./styles/public-header.css";
+@import "./styles/hero.css";
+@import "./styles/categories.css";
+@import "./styles/catalog.css";
+@import "./styles/cart.css";
+@import "./styles/checkout.css";
+@import "./styles/whatsapp.css";
+
+@import "./styles/admin-layout.css";
+@import "./styles/admin-login.css";
+@import "./styles/admin-dashboard.css";
+@import "./styles/admin-products.css";
+@import "./styles/admin-quotations.css";
+@import "./styles/admin-orders.css";
+@import "./styles/responsive.css";
+@import "./styles/footer.css";
+@import "./styles/brands.css";
+@import "./styles/why-choose.css";
+@import "./styles/company-showcase.css";
+@import "./styles/featured-products.css";
+@import "./styles/testimonials.css";
+@import "./styles/location-map.css";

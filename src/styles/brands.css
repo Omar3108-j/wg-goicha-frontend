@@ -1,0 +1,147 @@
+.brands-section {
+  padding: 28px 20px 45px;
+  background:
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fafafa 100%
+    );
+}
+
+.brands-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.brands-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.brands-header span {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #e1251b;
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+}
+
+.brands-header h2 {
+  margin: 0;
+  color: #111;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 950;
+  letter-spacing: -1px;
+}
+
+.brands-header p {
+  margin: 12px auto 0;
+  max-width: 620px;
+  color: #666;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.brands-list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+}
+
+.brands-carousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 10px 0 20px;
+}
+
+.brands-carousel::before,
+.brands-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 110px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.brands-carousel::before {
+  left: 0;
+  background: linear-gradient(90deg, #fff, transparent);
+}
+
+.brands-carousel::after {
+  right: 0;
+  background: linear-gradient(270deg, #fff, transparent);
+}
+
+.brands-track {
+  display: flex;
+  gap: 22px;
+  width: max-content;
+  animation: brandsScroll 28s linear infinite;
+}
+
+.brands-carousel:hover .brands-track {
+  animation-play-state: paused;
+}
+
+.brand-card {
+  flex: 0 0 210px;
+  height: 90px;
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid #ececec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  box-shadow: 0 14px 38px rgba(15, 23, 42, 0.06);
+  transition: all 0.3s ease;
+}
+
+.brand-card img {
+  max-width: 120px;
+  max-height: 44px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: all 0.3s ease;
+}
+
+.brand-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 22px 48px rgba(225, 37, 27, 0.16);
+}
+
+.brand-card:hover img {
+  transform: scale(1.06);
+}
+
+@keyframes brandsScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 768px) {
+  .brand-card {
+    flex-basis: 180px;
+    height: 90px;
+  }
+
+  .brand-card img {
+    max-width: 115px;
+    max-height: 45px;
+  }
+
+  .brands-track {
+    animation-duration: 22s;
+  }
+}
