@@ -32,7 +32,8 @@ function AdminQuotations() {
 
   const cargarCotizaciones = async () => {
     try {
-      const res = await axios.get(`/api/cotizaciones`)
+      const res = await axios.get(`${API_URL}/api/cotizaciones`)
+setCotizaciones(Array.isArray(res.data) ? res.data : [])
       setCotizaciones(res.data)
     } catch (error) {
       console.error("Error cargando cotizaciones:", error)
