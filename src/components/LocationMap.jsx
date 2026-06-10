@@ -18,7 +18,7 @@ function LocationMap() {
 
           <div className="location-card">
             <strong>Dirección</strong>
-            <p>AV. GUILLERMO DANSEY NRO. 481 INT. 159</p>
+            <p>Av. Guillermo Dansey Nro. 481 Int. 159</p>
             <p>Centro Comercial Loreto</p>
           </div>
 

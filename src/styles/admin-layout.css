@@ -3,9 +3,10 @@
 ========================= */
 
 .admin-shell {
-  min-height: 100vh;
+  height: 100vh;
   display: grid;
   grid-template-columns: 280px 1fr;
+  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 24%),
     radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.08), transparent 24%),
@@ -14,24 +15,32 @@
   font-family: "DM Sans", "Segoe UI", sans-serif;
 }
 
+
+
 .admin-main {
+  height: 100vh;
   padding: 42px;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
 /* SIDEBAR W&G FINAL PREMIUM */
 .admin-sidebar {
   width: 280px;
-  min-height: 100vh;
+  height: 100vh;
+  position: sticky;
+  top: 0;
   padding: 26px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  overflow: hidden;
   background: radial-gradient(circle at top left, rgba(239, 68, 68, 0.12), transparent 24%),
     linear-gradient(180deg, #09111f 0%, #0f172a 100%);
   border-right: 1px solid rgba(255,255,255,0.05);
   box-shadow: 10px 0 40px rgba(0,0,0,0.18);
 }
+
 /* BRAND */
 .admin-sidebar__brand {
   display: flex;
@@ -125,7 +134,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding-top: 20px;
+  margin-top: 220px;
+  padding-top: 22px;
   border-top: 1px solid rgba(255,255,255,0.06);
 }
 .admin-sidebar__store,

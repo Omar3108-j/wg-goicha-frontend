@@ -45,18 +45,19 @@ function Home() {
         <FeaturedProducts />
 
         <section id="productos">
-          <Products
-            whatsappUrl={whatsappUrl}
-            categoriaSeleccionada={categoriaSeleccionada}
-            setCategoriaSeleccionada={setCategoriaSeleccionada}
-          />
+  <Products
+    whatsappUrl={whatsappUrl}
+    categoriaSeleccionada={categoriaSeleccionada}
+    setCategoriaSeleccionada={setCategoriaSeleccionada}
+  />
 
-          <Testimonials />
+  <Testimonials />
+</section>
 
-          <LocationMap />
-          
-          <Footer />
-        </section>
+<section id="contacto">
+  <LocationMap />
+  <Footer />
+</section>
       </main>
 
       <WhatsAppButton />

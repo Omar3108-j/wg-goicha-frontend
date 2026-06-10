@@ -36,44 +36,48 @@
 
 .company-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 24px;
+  align-items: stretch;
 }
 
 .company-card {
   position: relative;
   overflow: hidden;
   border-radius: 30px;
-  min-height: 380px;
+  height: 420px; /* altura fija */
+  background: #111827;
 }
 
 .company-card img {
+  position: absolute;
+  inset: 0;
+
   width: 100%;
   height: 100%;
+
   object-fit: cover;
+  object-position: center;
 
   transition: transform .5s ease;
 }
 
 .company-card:hover img {
-  transform: scale(1.06);
+  transform: scale(1.05);
 }
 
 .company-overlay {
   position: absolute;
   inset: 0;
-
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-
   padding: 32px;
-
   background:
     linear-gradient(
       to top,
       rgba(0,0,0,.92),
-      rgba(0,0,0,.12)
+      rgba(0,0,0,.15)
     );
 }
 
@@ -81,23 +85,30 @@
   color: #ef4444;
   font-size: 12px;
   font-weight: 900;
-  letter-spacing: .2em;
+  letter-spacing: .22em;
 }
 
 .company-overlay h3 {
   margin: 10px 0;
   color: white;
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 950;
+  line-height: 1.05;
 }
 
 .company-overlay p {
-  color: rgba(255,255,255,.88);
+  color: rgba(255,255,255,.9);
   line-height: 1.6;
+  font-size: 15px;
 }
 
 @media (max-width: 900px) {
   .company-grid {
     grid-template-columns: 1fr;
   }
+
+  .company-card {
+    min-height: 350px;
+  }
 }
+
