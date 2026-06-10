@@ -23,7 +23,7 @@ function CompanyShowcase() {
 
     <div className="company-overlay">
       <span>NUESTRA TIENDA</span>
-      <h3>Showroom y atención</h3>
+      <h3>Tienda especializada</h3>
 
       <p>
         Visítanos y encuentra tuberías, conexiones,

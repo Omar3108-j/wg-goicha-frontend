@@ -39,10 +39,10 @@ function AdminProducts() {
 
   const cambiarDestacado = async (producto) => {
   try {
-    await axios.put(`/api/productos/${producto.id}`, {
-      ...producto,
-      destacado: !producto.destacado,
-    })
+    await axios.put(`${API_URL}/api/productos/${producto.id}`, {
+  ...producto,
+  destacado: !producto.destacado,
+})
 
     cargarProductos()
   } catch (error) {
