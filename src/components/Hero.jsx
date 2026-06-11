@@ -75,7 +75,7 @@ function Hero({ whatsappUrl }) {
             Cotizar por WhatsApp
           </a>
 
-          <a href="#catalogo" className="hero-btn-secondary">
+          <a href="#productos" className="hero-btn-secondary">
             <h2>Nuestros productos</h2>
           </a>
         </div>

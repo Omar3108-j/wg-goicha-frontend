@@ -1,9 +1,17 @@
 import { empresa } from "../data/empresa"
 import { Building2, Headset, ClipboardList} from "lucide-react"
+import { FaFacebookF } from "react-icons/fa"
+import { FaTiktok } from "react-icons/fa6"
+
 
 function Footer() {
   const mensaje = "Hola, deseo cotizar productos de tuberías y conexiones."
   const whatsappUrl = `https://wa.me/${empresa.whatsapp}?text=${encodeURIComponent(mensaje)}`
+  const ogtMessage = encodeURIComponent(
+  "Hola OGTSystems, vi el sitio web de W&G Corporación Goicha y me gustaría recibir información sobre el desarrollo de una página web o sistema para mi negocio."
+)
+
+const ogtUrl = `https://wa.me/51938495942?text=${ogtMessage}`
 
   return (
     <footer id="contacto" className="footer-premium">
@@ -76,11 +84,49 @@ function Footer() {
           </a>
         </div>
 
-        <div className="footer-premium__bottom">
-          <span>© {new Date().getFullYear()} {empresa.nombre}. Todos los derechos reservados.</span>
-          <span>Tuberías · Conexiones · Accesorios</span>
-        </div>
-      </div>
+        <div className="footer-bottom">
+
+  <div className="footer-copy">
+    <p>
+      © {new Date().getFullYear()} W&G Corporación Goicha E.I.R.L.
+      Todos los derechos reservados.
+    </p>
+
+  </div>
+
+  <div className="footer-socials">
+  <a
+    href="https://www.facebook.com/profile.php?id=61581582235767"
+    target="_blank"
+    rel="noreferrer"
+    aria-label="Facebook"
+  >
+    <FaFacebookF />
+  </a>
+
+  <a
+    href="https://www.tiktok.com/@goichainversiones1"
+    target="_blank"
+    rel="noreferrer"
+    aria-label="TikTok"
+  >
+    <FaTiktok />
+  </a>
+</div>
+
+  <div className="footer-right">
+  <a
+  href={ogtUrl}
+  target="_blank"
+  rel="noreferrer"
+  className="footer-powered"
+>
+  Sitio web desarrollado por OGTSystems®
+</a>
+</div>
+
+</div>
+</div>
     </footer>
   )
 }
