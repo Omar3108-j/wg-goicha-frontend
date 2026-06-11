@@ -57,7 +57,7 @@ const ogtUrl = `https://wa.me/51938495942?text=${ogtMessage}`
 </div>
             <small>Atención comercial</small>
             <>
-  <h3>{empresa.telefono || empresa.whatsapp}</h3>
+  <h3>994079602</h3>
   <p>Lunes a sábado · 08:00 AM - 07:00 PM</p>
 </>
           </div>

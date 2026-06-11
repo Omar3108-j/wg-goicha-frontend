@@ -31,10 +31,10 @@ function Categories({ whatsappUrl, onSelectCategory }) {
 
   return (
     <section
-  id="categorias"
-  ref={catRef}
-  className={`categories-section reveal ${catVisible ? "is-visible" : ""}`}
->
+      id="categorias"
+      ref={catRef}
+      className={`categories-section reveal ${catVisible ? "is-visible" : ""}`}
+    >
       <div className="section-container">
         <div className="section-heading">
           <div>
@@ -59,26 +59,15 @@ function Categories({ whatsappUrl, onSelectCategory }) {
 
           <div className="categories-slider" ref={sliderRef}>
             <div className="categories-track">
-              {categorias.map((cat, index) => (
+              {categorias.map((cat) => (
                 <button
+                  key={cat.id || cat.nombre}
                   type="button"
-                  key={cat.id}
-                  className={`category-premium-card ${
-                    catVisible ? "is-visible" : ""
-                  }`}
+                  className="category-premium-card"
                   style={{
-                    transitionDelay: `${index * 0.06}s`,
-                    backgroundImage: `
-                      linear-gradient(
-                        rgba(0,0,0,0.25),
-                        rgba(0,0,0,0.66)
-                      ),
-                      ${
-                        cat.imagen
-                          ? `url(${cat.imagen})`
-                          : "linear-gradient(135deg, #111827, #ef4444)"
-                      }
-                    `,
+                    backgroundImage: cat.imagen
+                      ? `url(${cat.imagen})`
+                      : "linear-gradient(135deg, #111827, #ef4444)",
                   }}
                   onClick={() => {
                     onSelectCategory(cat.nombre)
@@ -88,9 +77,17 @@ function Categories({ whatsappUrl, onSelectCategory }) {
                   }}
                 >
                   <span>Categoría</span>
-                  <h3>{cat.nombre}</h3>
-                  <p>{cat.descripcion}</p>
-                  <strong>Ver línea completa →</strong>
+
+                  <div className="category-content">
+                    <h3>{cat.nombre}</h3>
+
+                    <p>
+                      {cat.descripcion ||
+                        "Productos de calidad para tus proyectos"}
+                    </p>
+
+                    <strong>Explorar productos →</strong>
+                  </div>
                 </button>
               ))}
             </div>
