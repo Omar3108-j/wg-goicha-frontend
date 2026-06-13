@@ -14,7 +14,7 @@ function Footer() {
 const ogtUrl = `https://wa.me/51938495942?text=${ogtMessage}`
 
   return (
-    <footer id="contacto" className="footer-premium">
+    <footer className="footer-premium">
       <div className="footer-premium__bg" />
 
       <div className="footer-premium__container">
@@ -47,8 +47,9 @@ const ogtUrl = `https://wa.me/51938495942?text=${ogtMessage}`
   <Building2 size={30} />
 </div>
             <small>Ubicación</small>
-            <p>Lima Metropolitana · Atención a nivel nacional</p>
-            <p>{empresa.direccion || "Atendemos pedidos y cotizaciones a nivel nacional."}</p>
+            <p>Av. Guillermo Dansey 481 Int. 159</p>
+<p>Centro Comercial Loreto, Lima - Perú</p>
+<p>Atención a Lima Metropolitana y envíos a nivel nacional.</p>
           </div>
 
           <div className="footer-card">

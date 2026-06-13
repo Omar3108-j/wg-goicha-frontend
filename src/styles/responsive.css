@@ -1,26 +1,8 @@
-/* =========================
+/* ============================================================
    RESPONSIVE GLOBAL
-========================= */
+   ============================================================ */
 
 @media (max-width: 850px) {
-  .header__nav {
-    display: none;
-  }
-
-  .brand-text span {
-    display: none;
-  }
-
-  .brand-text strong {
-    font-size: 14px;
-  }
-
-  .brand-mark {
-    width: 44px;
-    height: 44px;
-    font-size: 16px;
-  }
-
   .hero-pro {
     grid-template-columns: 1fr;
   }
@@ -38,32 +20,10 @@
   }
 }
 
-@media (max-width: 600px) {
-  .whatsapp-float {
-    right: 18px;
-    bottom: 20px;
-  }
-
-  .whatsapp-label {
-    display: none;
-  }
-
-  .whatsapp-pulse {
-    width: 60px;
-    height: 60px;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero-pro__content {
-    padding: 36px 22px 40px;
-  }
-
-  .hero-title {
-    font-size: 34px;
-  }
-}
 @media (max-width: 768px) {
+  /* ELIMINADO: overflow-x: hidden en html/body mata position:sticky del header
+     Se reemplaza con overflow-x en #root (ver base.css) */
+
   .catalog-grid {
     grid-template-columns: 1fr 1fr;
     gap: 14px;
@@ -103,164 +63,29 @@
     border-radius: 14px;
   }
 }
-@media (max-width: 768px) {
-  .header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+
+@media (max-width: 600px) {
+  .whatsapp-float {
+    right: 18px;
+    bottom: 20px;
   }
 
-  .header__container {
-    padding: 10px 14px;
-  }
-
-  .brand-mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
-    font-size: 15px;
-  }
-
-  .brand-text strong {
-    font-size: 13px;
-  }
-
-  .brand-text span {
+  .whatsapp-label {
     display: none;
   }
 
-  .header__nav {
-    display: none;
-  }
-
-  .header__button {
-    padding: 11px 16px;
-    font-size: 12px;
-  }
-}
-.mobile-menu-button {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobile-menu-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 44px;
-    height: 44px;
-
-    border: none;
-    border-radius: 14px;
-
-    background: #111827;
-    color: white;
-
-    font-size: 22px;
-    cursor: pointer;
-  }
-
-  .mobile-menu {
-    position: absolute;
-    top: 78px;
-    left: 14px;
-    right: 14px;
-
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    padding: 18px;
-
-    border-radius: 22px;
-
-    background: rgba(15, 23, 42, 0.96);
-
-    backdrop-filter: blur(20px);
-
-    border: 1px solid rgba(255, 255, 255, 0.06);
-
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-
-    z-index: 120;
-  }
-
-  .mobile-menu a {
-    color: white;
-    text-decoration: none;
-
-    font-size: 15px;
-    font-weight: 700;
-
-    padding: 12px 14px;
-
-    border-radius: 14px;
-
-    transition: background 0.25s ease;
-  }
-
-  .mobile-menu a:hover {
-    background: rgba(255, 255, 255, 0.06);
-  }
-}
-.hdr__burger {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .hdr__right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .hdr__cta {
-    display: none;
-  }
-
-  .hdr__burger {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-
-    width: 46px;
-    height: 46px;
-
-    border: none;
-    border-radius: 16px;
-
-    background: #111827;
-    color: #ffffff;
-
-    font-size: 24px;
-    font-weight: 900;
-
-    cursor: pointer;
-    z-index: 200;
-  }
-
-  .hdr__nav {
-    display: none;
-  }
-}
-.hdr__burger span {
-  display: block;
-  width: 20px;
-  height: 2px;
-  background: #ffffff;
-  border-radius: 999px;
-}
-@media (max-width: 768px) {
-  .hdr__burger {
-    position: relative;
-    z-index: 1200 !important;
-  }
-
-  .cart-floating-button {
-    top: 76px;
-    right: 16px;
-    z-index: 900;
+  .whatsapp-pulse {
+    width: 60px;
+    height: 60px;
   }
 }
 
+@media (max-width: 480px) {
+  .hero-pro__content {
+    padding: 36px 22px 40px;
+  }
+
+  .hero-title {
+    font-size: 34px;
+  }
+}

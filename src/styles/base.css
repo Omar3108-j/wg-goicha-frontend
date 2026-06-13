@@ -1,5 +1,6 @@
 #root {
   width: 100%;
+  overflow-x: hidden; /* Movido aquí desde responsive.css — no afecta position:sticky */
 }
 
 * {
