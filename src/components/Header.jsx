@@ -163,15 +163,16 @@ function Header() {
 
         <div className="drawer__footer">
           <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="drawer__cta-main"
-            onClick={close}
-          >
-            <FaWhatsapp />
-            <span>Cotizar por WhatsApp</span>
-          </a>
+  href={whatsappUrl}
+  target="_blank"
+  rel="noreferrer"
+  className="drawer__cta-main drawer__cta-outline"
+  onClick={close}
+>
+  <FaWhatsapp className="drawer__cta-icon" />
+  <span>Cotizar por WhatsApp</span>
+  <span className="drawer__cta-arrow">→</span>
+</a>
 
           <a href="#productos" className="drawer__cta-sub" onClick={close}>
             Ver catálogo completo →

@@ -408,16 +408,23 @@
    RESPONSIVE — drawer en móvil
    ============================================================ */
 @media (max-width: 980px) {
+
   .cart-floating-button {
-    top: 11px;
-    right: 66px;
-    width: 42px;
-    height: 42px;
+    position: fixed !important;
+    top: 10px !important;
+    right: 72px !important;
+
+    width: 44px !important;
+    height: 44px !important;
+
     border-radius: 14px;
-    box-shadow: none;
+    z-index: 5000 !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
-  /* En móvil el header mide 64px */
   .cart-drawer {
     padding-top: 80px;
   }
@@ -428,11 +435,16 @@
 }
 
 @media (max-width: 560px) {
+
   .cart-floating-button {
-    top: 11px;
-    right: 64px;
-    width: 40px;
-    height: 40px;
+    position: fixed !important;
+    top: 10px !important;
+    right: 70px !important;
+
+    width: 42px !important;
+    height: 42px !important;
+
+    z-index: 5000 !important;
   }
 
   .cart-drawer {
@@ -442,9 +454,18 @@
 
 @media (max-width: 390px) {
   .cart-floating-button {
-    top: 12px;
-    right: 62px;
-    width: 38px;
-    height: 38px;
+    right: 66px !important;
+    width: 40px !important;
+    height: 40px !important;
+  }
+}
+@media (max-width: 980px) {
+  .cart-floating-button {
+    position: fixed !important;
+    top: 11px !important;
+    right: 74px !important;
+    width: 44px !important;
+    height: 44px !important;
+    z-index: 9100 !important;
   }
 }

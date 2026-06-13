@@ -1,6 +1,6 @@
 #root {
   width: 100%;
-  overflow-x: hidden; /* Movido aquí desde responsive.css — no afecta position:sticky */
+  /* SIN overflow-x: hidden aquí — mataría position:sticky del header */
 }
 
 * {
@@ -15,6 +15,7 @@ body {
   margin: 0;
   background: #f8f8f6;
   color: #171717;
+  /* SIN overflow-x: hidden aquí tampoco */
 }
 
 a {
@@ -22,10 +23,7 @@ a {
   color: inherit;
 }
 
-.page-main {
-  font-family: "DM Sans", "Segoe UI", sans-serif;
-  background: #f8f8f6;
-}
+
 
 .section-container {
   max-width: 1120px;
