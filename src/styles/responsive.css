@@ -90,22 +90,3 @@
   }
 }
 
-@media (max-width: 768px) {
-  .hdr {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 3000 !important;
-  }
-
-  .cart-floating-button {
-    position: fixed !important;
-    top: 12px !important;
-    right: 76px !important;
-    z-index: 3100 !important;
-  }
-
-  .hdr__burger {
-    position: relative;
-    z-index: 3200 !important;
-  }
-}
