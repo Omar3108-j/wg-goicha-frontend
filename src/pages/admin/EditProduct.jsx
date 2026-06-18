@@ -20,6 +20,7 @@ function EditProduct() {
   const [categorias, setCategorias] = useState([])
   const [imagenNueva, setImagenNueva] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [variantes, setVariantes] = useState([])
 
   useEffect(() => {
     axios.get(`${API_URL}/api/categorias`)
@@ -29,25 +30,25 @@ function EditProduct() {
     axios.get(`${API_URL}/api/productos/${id}`)
       .then((res) => {
         const prod = res.data
-
         setForm({
           nombre: prod.nombre || "",
           descripcion: prod.descripcion || "",
           tipo: prod.tipo || "",
           marca: prod.marca || "",
-          precio: prod.precio ||"",
+          precio: prod.precio ?? "",
           categoriaId: prod.categoria?.id || "",
           imagenActual: prod.imagen || "",
         })
       })
       .catch((err) => console.error("Error cargando producto:", err))
+
+    axios.get(`${API_URL}/api/variantes/producto/${id}`)
+      .then((res) => setVariantes(res.data))
+      .catch((err) => console.error("Error cargando variantes:", err))
   }, [id])
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    })
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handleFileChange = (e) => {
@@ -64,12 +65,7 @@ function EditProduct() {
       if (imagenNueva) {
         const formData = new FormData()
         formData.append("file", imagenNueva)
-
-        const uploadRes = await axios.post(
-          `${API_URL}/api/upload`,
-          formData
-        )
-
+        const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
         imageUrl = uploadRes.data
       }
 
@@ -78,11 +74,9 @@ function EditProduct() {
         descripcion: form.descripcion,
         tipo: form.tipo,
         marca: form.marca,
-        precio: Number(form.precio || 0),
+        precio: variantes.length > 0 ? 0 : Number(form.precio || 0),
         imagen: imageUrl,
-        categoria: {
-          id: form.categoriaId,
-        },
+        categoria: { id: form.categoriaId },
       })
 
       alert("Producto actualizado correctamente")
@@ -97,7 +91,8 @@ function EditProduct() {
 
   return (
     <div className="admin-page">
-      <div className="admin-card">
+      <div className="admin-card admin-edit-card">
+
         <div className="admin-header">
           <p className="admin-badge">Panel administrador</p>
           <h1>Editar producto</h1>
@@ -105,6 +100,8 @@ function EditProduct() {
         </div>
 
         <form className="admin-form" onSubmit={handleSubmit}>
+
+          {/* Fila 1: Nombre + Marca */}
           <div className="form-grid">
             <div className="form-group">
               <label>Nombre del producto</label>
@@ -116,7 +113,6 @@ function EditProduct() {
                 required
               />
             </div>
-
             <div className="form-group">
               <label>Marca</label>
               <input
@@ -128,7 +124,8 @@ function EditProduct() {
             </div>
           </div>
 
-          <div className="form-grid">
+          {/* Fila 2: Tipo + Precio + Categoría */}
+          <div className="form-grid form-grid--3">
             <div className="form-group">
               <label>Tipo / Uso</label>
               <input
@@ -140,17 +137,23 @@ function EditProduct() {
             </div>
 
             <div className="form-group">
-  <label>Precio</label>
-  <input
-    type="number"
-    name="precio"
-    placeholder="Ej: 25.90"
-    value={form.precio}
-    onChange={handleChange}
-    min="0"
-    step="0.01"
-  />
-</div>
+              <label>Precio</label>
+              {variantes.length > 0 ? (
+                <div className="admin-price-disabled">
+                  Precio por variante
+                </div>
+              ) : (
+                <input
+                  type="number"
+                  name="precio"
+                  placeholder="Ej: 25.90"
+                  value={form.precio}
+                  onChange={handleChange}
+                  min="0"
+                  step="0.01"
+                />
+              )}
+            </div>
 
             <div className="form-group">
               <label>Categoría</label>
@@ -170,39 +173,37 @@ function EditProduct() {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Descripción</label>
-            <textarea
-              name="descripcion"
-              placeholder="Descripción del producto..."
-              value={form.descripcion}
-              onChange={handleChange}
-            />
-          </div>
+          {/* Fila 3: Descripción + Imagen lado a lado */}
+          <div className="form-grid form-grid--desc-img">
+            <div className="form-group">
+              <label>Descripción</label>
+              <textarea
+                name="descripcion"
+                placeholder="Descripción del producto..."
+                value={form.descripcion}
+                onChange={handleChange}
+              />
+            </div>
 
-          {form.imagenActual && (
             <div className="form-group">
               <label>Imagen actual</label>
               <div className="admin-preview-image">
                 <img src={form.imagenActual} alt={form.nombre} />
               </div>
+              <label style={{ marginTop: "10px" }}>Cambiar imagen</label>
+              <input type="file" accept="image/*" onChange={handleFileChange} />
             </div>
-          )}
-
-          <div className="form-group">
-            <label>Cambiar imagen</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
           </div>
 
           <div className="admin-form-actions">
             <Link to="/admin/productos" className="admin-cancel-button">
               Cancelar
             </Link>
-
             <button className="save-button" type="submit" disabled={loading}>
               {loading ? "Actualizando..." : "Actualizar producto"}
             </button>
           </div>
+
         </form>
       </div>
     </div>

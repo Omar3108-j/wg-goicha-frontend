@@ -3,7 +3,7 @@ import { API_URL } from "../config/api"
 const PRODUCTOS_URL = `${API_URL}/api/productos`
 
 export async function obtenerProductos() {
-  const response = await fetch(PRODUCTOS_URL)
+  const response = await fetch(`${PRODUCTOS_URL}/activos`)
 
   if (!response.ok) {
     throw new Error("Error al obtener productos")

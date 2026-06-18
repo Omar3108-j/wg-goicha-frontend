@@ -4,6 +4,7 @@ import { API_URL } from "../config/api"
 
 function FeaturedProducts() {
   const [productos, setProductos] = useState([])
+  const [preciosMinimos, setPreciosMinimos] = useState({})
   const sliderRef = useRef(null)
 
   useEffect(() => {
@@ -11,13 +12,39 @@ function FeaturedProducts() {
   }, [])
 
   const cargarDestacados = async () => {
-    try {
-      const data = await obtenerProductosDestacados()
-      setProductos(data)
-    } catch (error) {
-      console.error("Error cargando destacados", error)
+  try {
+    const data = await obtenerProductosDestacados()
+    setProductos(data)
+
+    const precios = {}
+
+    for (const prod of data) {
+      const precioMinimo = await obtenerPrecioMinimoVariante(prod.id)
+
+      if (precioMinimo !== null) {
+        precios[prod.id] = precioMinimo
+      }
     }
+
+    setPreciosMinimos(precios)
+  } catch (error) {
+    console.error("Error cargando destacados", error)
   }
+}
+  const obtenerPrecioMinimoVariante = async (productoId) => {
+  try {
+    const res = await fetch(`${API_URL}/api/variantes/producto/${productoId}/activas`)
+    const variantes = await res.json()
+
+    if (!variantes || variantes.length === 0) return null
+
+    const precios = variantes.map((v) => Number(v.precio || 0))
+    return Math.min(...precios)
+  } catch (error) {
+    console.error("Error obteniendo variantes del destacado:", error)
+    return null
+  }
+}
 
   const moverSlider = (direccion) => {
     if (!sliderRef.current) return
@@ -62,7 +89,13 @@ function FeaturedProducts() {
                   <h3>{prod.nombre}</h3>
                   <p>{prod.descripcion}</p>
 
-                  <span>S/ {Number(prod.precio || 0).toFixed(2)}</span>
+                  <span>
+                    {preciosMinimos[prod.id] !== undefined ? (
+                      <>Desde S/ {Number(preciosMinimos[prod.id]).toFixed(2)}</>
+                    ) : (
+                      <>S/ {Number(prod.precio || 0).toFixed(2)}</>
+                    )}
+                  </span>
 
                   <a href="#productos" className="featured-button">
                     Ver en catálogo →
