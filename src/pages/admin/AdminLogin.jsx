@@ -19,12 +19,15 @@ function AdminLogin() {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    if (form.usuario === "admin" && form.password === "123456") {
-      localStorage.setItem("adminAuth", "true")
-      navigate("/admin/productos")
-    } else {
-      alert("Credenciales incorrectas")
-    }
+    if (
+  form.usuario.trim().toLowerCase() === "gloria" &&
+  form.password === "loreto159"
+) {
+  localStorage.setItem("adminAuth", "true")
+  navigate("/admin/productos")
+} else {
+  alert("Credenciales incorrectas")
+}
   }
 
   return (
