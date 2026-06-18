@@ -3,7 +3,6 @@ import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { API_URL } from "../../config/api"
 
-
 function AddProduct() {
   const [form, setForm] = useState({
     nombre: "",
@@ -16,6 +15,7 @@ function AddProduct() {
 
   const [categorias, setCategorias] = useState([])
   const [imagen, setImagen] = useState(null)
+  const [preview, setPreview] = useState(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
@@ -27,14 +27,15 @@ function AddProduct() {
   }, [])
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    })
+    setForm({ ...form, [e.target.name]: e.target.value })
   }
 
   const handleFileChange = (e) => {
-    setImagen(e.target.files[0])
+    const file = e.target.files[0]
+    setImagen(file)
+    if (file) {
+      setPreview(URL.createObjectURL(file))
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -47,12 +48,7 @@ function AddProduct() {
       if (imagen) {
         const formData = new FormData()
         formData.append("file", imagen)
-
-        const uploadRes = await axios.post(
-          `${API_URL}/api/upload`,
-          formData
-        )
-
+        const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
         imageUrl = uploadRes.data
       }
 
@@ -63,22 +59,13 @@ function AddProduct() {
         marca: form.marca,
         precio: Number(form.precio || 0),
         imagen: imageUrl,
-        categoria: {
-          id: form.categoriaId,
-        },
+        categoria: { id: form.categoriaId },
       })
 
       alert("Producto creado correctamente")
-
-      setForm({
-        nombre: "",
-        descripcion: "",
-        tipo: "",
-        marca: "",
-        precio: "",
-        categoriaId: "",
-      })
+      setForm({ nombre: "", descripcion: "", tipo: "", marca: "", precio: "", categoriaId: "" })
       setImagen(null)
+      setPreview(null)
     } catch (error) {
       console.error("Error al crear producto:", error)
       alert("Error al crear producto")
@@ -89,7 +76,8 @@ function AddProduct() {
 
   return (
     <div className="admin-page">
-      <div className="admin-card">
+      <div className="admin-card admin-edit-card">
+
         <div className="admin-header">
           <p className="admin-badge">Panel administrador</p>
           <h1>Agregar producto</h1>
@@ -97,6 +85,8 @@ function AddProduct() {
         </div>
 
         <form className="admin-form" onSubmit={handleSubmit}>
+
+          {/* Fila 1: Nombre + Marca */}
           <div className="form-grid">
             <div className="form-group">
               <label>Nombre del producto</label>
@@ -108,7 +98,6 @@ function AddProduct() {
                 required
               />
             </div>
-
             <div className="form-group">
               <label>Marca</label>
               <input
@@ -120,7 +109,8 @@ function AddProduct() {
             </div>
           </div>
 
-          <div className="form-grid">
+          {/* Fila 2: Tipo + Precio + Categoría */}
+          <div className="form-grid form-grid--3">
             <div className="form-group">
               <label>Tipo / Uso</label>
               <input
@@ -130,20 +120,18 @@ function AddProduct() {
                 onChange={handleChange}
               />
             </div>
-
             <div className="form-group">
-  <label>Precio</label>
-  <input
-    type="number"
-    name="precio"
-    placeholder="Ej: 25.90"
-    value={form.precio}
-    onChange={handleChange}
-    min="0"
-    step="0.01"
-  />
-</div>
-
+              <label>Precio</label>
+              <input
+                type="number"
+                name="precio"
+                placeholder="Ej: 25.90"
+                value={form.precio}
+                onChange={handleChange}
+                min="0"
+                step="0.01"
+              />
+            </div>
             <div className="form-group">
               <label>Categoría</label>
               <select
@@ -162,31 +150,47 @@ function AddProduct() {
             </div>
           </div>
 
-          <div className="form-group">
-            <label>Descripción</label>
-            <textarea
-              name="descripcion"
-              placeholder="Descripción del producto..."
-              value={form.descripcion}
-              onChange={handleChange}
-            />
+          {/* Fila 3: Descripción + Imagen lado a lado */}
+          <div className="form-grid form-grid--desc-img">
+            <div className="form-group">
+              <label>Descripción</label>
+              <textarea
+                name="descripcion"
+                placeholder="Descripción del producto..."
+                value={form.descripcion}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Imagen del producto</label>
+              {preview ? (
+                <div className="admin-preview-image">
+                  <img src={preview} alt="Vista previa" />
+                </div>
+              ) : (
+                <div className="admin-preview-image admin-preview-placeholder">
+                  <span>Sin imagen</span>
+                </div>
+              )}
+              <label style={{ marginTop: "10px" }}>Seleccionar archivo</label>
+              <input type="file" accept="image/*" onChange={handleFileChange} />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label>Imagen del producto</label>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
+          <div className="admin-form-actions">
+            <button
+              type="button"
+              className="admin-cancel-button"
+              onClick={() => navigate("/admin/productos")}
+            >
+              ← Volver
+            </button>
+            <button className="save-button" type="submit" disabled={loading}>
+              {loading ? "Guardando..." : "Guardar producto"}
+            </button>
           </div>
-          <button
-  type="button"
-  className="admin-back-button"
-  onClick={() => navigate("/admin/productos")}
->
-  ← Volver a productos
-</button>
 
-          <button className="save-button" type="submit" disabled={loading}>
-            {loading ? "Guardando..." : "Guardar Producto"}
-          </button>
         </form>
       </div>
     </div>

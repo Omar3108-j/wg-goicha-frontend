@@ -26,7 +26,6 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
   const [carritoCargado, setCarritoCargado] = useState(false)
   const [pedidoExitoso, setPedidoExitoso] = useState(null)
   const [whatsappPedidoUrl, setWhatsappPedidoUrl] = useState("")
-  const [productosConCualquierVariante, setProductosConCualquierVariante] = useState([])
 
   const [form, setForm] = useState({
     cliente: "",
@@ -39,35 +38,41 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
     observaciones: "",
   })
 
+  // FIX: definida ANTES de usarse en el useEffect
+  const obtenerVariantesActivasProducto = async (productoId) => {
+    try {
+      const res = await axios.get(
+        `${API_URL}/api/variantes/producto/${productoId}/activas`
+      )
+      return res.data || []
+    } catch (error) {
+      console.error("Error verificando variantes:", error)
+      return []
+    }
+  }
+
   useEffect(() => {
     const cargarProductos = async () => {
       try {
         const data = await obtenerProductos()
-setProductos(data)
+        setProductos(data)
 
-const productosConVar = []
-const productosConVarTodas = []
-const preciosMinimos = {}
+        const idsConVariantesActivas = []
+        const preciosMinimos = {}
 
-for (const prod of data) {
-  const todasLasVariantes = await obtenerTodasVariantesProducto(prod.id)
-  const variantesActivas = await obtenerVariantesActivasProducto(prod.id)
+        for (const prod of data) {
+          // FIX: solo necesitamos variantes activas para ambas lógicas
+          const variantesActivas = await obtenerVariantesActivasProducto(prod.id)
 
-  if (todasLasVariantes.length > 0) {
-    productosConVarTodas.push(prod.id)
-  }
+          if (variantesActivas.length > 0) {
+            idsConVariantesActivas.push(prod.id)
+            const precios = variantesActivas.map((v) => Number(v.precio || 0))
+            preciosMinimos[prod.id] = Math.min(...precios)
+          }
+        }
 
-  if (variantesActivas.length > 0) {
-    productosConVar.push(prod.id)
-
-    const precios = variantesActivas.map((v) => Number(v.precio || 0))
-    preciosMinimos[prod.id] = Math.min(...precios)
-  }
-}
-
-setProductosConCualquierVariante(productosConVarTodas)
-setProductosConVariantes(productosConVar)
-setPreciosMinimosVariantes(preciosMinimos)
+        setProductosConVariantes(idsConVariantesActivas)
+        setPreciosMinimosVariantes(preciosMinimos)
       } catch (error) {
         console.error("Error cargando productos:", error)
       } finally {
@@ -77,7 +82,6 @@ setPreciosMinimosVariantes(preciosMinimos)
     cargarProductos()
   }, [])
 
-  // FIX: un solo useEffect para cargar carrito desde localStorage
   useEffect(() => {
     const carritoGuardado = localStorage.getItem("wg_carrito")
     if (carritoGuardado) {
@@ -99,7 +103,6 @@ setPreciosMinimosVariantes(preciosMinimos)
       .catch((err) => console.error("Error cargando categorías:", err))
   }, [])
 
-  // FIX: agregarAlCarrito ahora incluye el setCarrito completo
   const agregarAlCarrito = (producto) => {
     const productoParaCarrito = {
       id: producto.id,
@@ -137,25 +140,24 @@ setPreciosMinimosVariantes(preciosMinimos)
   }
 
   const obtenerCantidad = (keyCarrito) => {
-  const item = carrito.find(p => p.keyCarrito === keyCarrito)
-  return item ? item.cantidad : 0
-}
-
-const aumentarCantidad = (keyCarrito) => {
-  const item = carrito.find(p => p.keyCarrito === keyCarrito)
-  if (item) cambiarCantidad(keyCarrito, item.cantidad + 1)
-}
-
-const disminuirCantidad = (keyCarrito) => {
-  const item = carrito.find(p => p.keyCarrito === keyCarrito)
-  if (!item) return
-
-  if (item.cantidad <= 1) {
-    quitarDelCarrito(keyCarrito)
-  } else {
-    cambiarCantidad(keyCarrito, item.cantidad - 1)
+    const item = carrito.find(p => p.keyCarrito === keyCarrito)
+    return item ? item.cantidad : 0
   }
-}
+
+  const aumentarCantidad = (keyCarrito) => {
+    const item = carrito.find(p => p.keyCarrito === keyCarrito)
+    if (item) cambiarCantidad(keyCarrito, item.cantidad + 1)
+  }
+
+  const disminuirCantidad = (keyCarrito) => {
+    const item = carrito.find(p => p.keyCarrito === keyCarrito)
+    if (!item) return
+    if (item.cantidad <= 1) {
+      quitarDelCarrito(keyCarrito)
+    } else {
+      cambiarCantidad(keyCarrito, item.cantidad - 1)
+    }
+  }
 
   const toggleProductoCarrito = (producto) => {
     if (productoEstaEnCarrito(producto.id)) {
@@ -167,21 +169,17 @@ const disminuirCantidad = (keyCarrito) => {
   }
 
   const cambiarCantidad = (keyCarrito, cantidad) => {
-  if (cantidad <= 0) {
-    quitarDelCarrito(keyCarrito)
-    return
+    if (cantidad <= 0) {
+      quitarDelCarrito(keyCarrito)
+      return
+    }
+    setCarrito((prev) =>
+      prev.map((item) =>
+        item.keyCarrito === keyCarrito ? { ...item, cantidad } : item
+      )
+    )
   }
 
-  setCarrito((prev) =>
-    prev.map((item) =>
-      item.keyCarrito === keyCarrito
-        ? { ...item, cantidad }
-        : item
-    )
-  )
-}
-
-  // FIX: quitarDelCarrito usa keyCarrito consistentemente
   const quitarDelCarrito = (keyCarrito) => {
     setCarrito((prev) =>
       prev.filter((item) => item.keyCarrito !== keyCarrito)
@@ -221,13 +219,9 @@ const disminuirCantidad = (keyCarrito) => {
   }
 
   const confirmarPedido = async () => {
-    if (carrito.length === 0) {
-      alert("Agrega productos al carrito")
-      return
-    }
+    if (carrito.length === 0) { alert("Agrega productos al carrito"); return }
 
     const telefonoLimpio = form.telefono.replace(/\D/g, "")
-
     if (!form.cliente.trim()) { alert("Ingresa tu nombre completo."); return }
     if (!telefonoLimpio) { alert("Ingresa tu número de WhatsApp."); return }
     if (telefonoLimpio.length < 9) { alert("El número de WhatsApp debe tener al menos 9 dígitos."); return }
@@ -288,30 +282,21 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
 
       const url = `https://wa.me/51994079602?text=${encodeURIComponent(mensaje)}`
 
-setPedidoExitoso({
-  ...pedido,
-  cliente: form.cliente,
-  total,
-  totalItems: totalItemsCarrito,
-})
-
-setWhatsappPedidoUrl(url)
-
-setCarrito([])
-localStorage.removeItem("wg_carrito")
-
-setForm({
-  cliente: "",
-  telefono: "",
-  correo: "",
-  direccion: "",
-  distrito: "",
-  metodoPago: "",
-  numeroOperacion: "",
-  observaciones: "",
-})
-
-setCheckoutOpen(false)
+      setPedidoExitoso({
+        ...pedido,
+        cliente: form.cliente,
+        total,
+        totalItems: totalItemsCarrito,
+      })
+      setWhatsappPedidoUrl(url)
+      setCarrito([])
+      localStorage.removeItem("wg_carrito")
+      setForm({
+        cliente: "", telefono: "", correo: "",
+        direccion: "", distrito: "", metodoPago: "",
+        numeroOperacion: "", observaciones: "",
+      })
+      setCheckoutOpen(false)
     } catch (error) {
       console.error("Error registrando pedido:", error)
       alert("No se pudo registrar el pedido")
@@ -323,18 +308,15 @@ setCheckoutOpen(false)
     ...categorias.map((cat) => cat.nombre),
   ]
 
+  // FIX: lógica de filtrado corregida
+  // Mostrar si: tiene variantes activas (precio base puede ser 0)
+  //          O: no tiene variantes y precio base > 0
   const productosFiltrados = productos.filter((prod) => {
-    const tieneCualquierVariante = productosConCualquierVariante.includes(prod.id)
-const tieneVariantesActivas = productosConVariantes.includes(prod.id)
-const precioBase = Number(prod.precio || 0)
+    const tieneVariantesActivas = productosConVariantes.includes(prod.id)
+    const precioBase = Number(prod.precio || 0)
 
-if (tieneCualquierVariante && !tieneVariantesActivas) {
-  return false
-}
+    if (!tieneVariantesActivas && precioBase <= 0) return false
 
-if (!tieneCualquierVariante && precioBase <= 0) {
-  return false
-}
     const texto = `
       ${prod.nombre || ""}
       ${prod.marca || ""}
@@ -360,18 +342,6 @@ if (!tieneCualquierVariante && precioBase <= 0) {
   const productosPaginados = productosFiltrados.slice(indicePrimerProducto, indiceUltimoProducto)
   const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina)
 
-  const obtenerVariantesActivasProducto = async (productoId) => {
-  try {
-    const res = await axios.get(
-      `${API_URL}/api/variantes/producto/${productoId}/activas`
-    )
-
-    return res.data || []
-  } catch (error) {
-    console.error("Error verificando variantes:", error)
-    return []
-  }
-}
   return (
     <section id="productos" ref={prodRef} className="catalog-section">
       <div className="catalog-dots" />
@@ -452,95 +422,93 @@ if (!tieneCualquierVariante && precioBase <= 0) {
         )}
 
         <div className="catalog-grid">
-  {productosPaginados.map((prod, index) => {
-    const tieneVariantes = productosConVariantes.includes(prod.id)
+          {productosPaginados.map((prod, index) => {
+            const tieneVariantes = productosConVariantes.includes(prod.id)
 
-    return (
-      <div
-        key={prod.id || prod.nombre}
-              className={`product-card ${prodVisible ? "is-visible" : ""}`}
-              style={{ transitionDelay: `${index * 0.07}s` }}
-            >
-              {prod.tag && (
-                <div className={`product-badge ${prod.tag.toLowerCase()}`}>
-                  {prod.tag}
-                </div>
-              )}
+            return (
               <div
-                className="product-card__image"
-                onClick={() => {
-                  setSelectedProduct(prod)
-                  cargarVariantes(prod.id)
-                }}
+                key={prod.id || prod.nombre}
+                className={`product-card ${prodVisible ? "is-visible" : ""}`}
+                style={{ transitionDelay: `${index * 0.07}s` }}
               >
-                {prod.imagen
-                  ? <img src={prod.imagen} alt={prod.nombre} loading="lazy" />
-                  : <span>🔧</span>
-                }
-              </div>
-
-              <div className="product-card__body">
-                <span className="product-stock">● STOCK</span>
-                <div className="product-meta">
-                  {prod.marca && <span>{prod.marca}</span>}
-                  {(prod.tipo || prod.categoria?.nombre) && (
-                    <><b>·</b><span>{prod.tipo || prod.categoria?.nombre}</span></>
-                  )}
+                {prod.tag && (
+                  <div className={`product-badge ${prod.tag.toLowerCase()}`}>
+                    {prod.tag}
+                  </div>
+                )}
+                <div
+                  className="product-card__image"
+                  onClick={() => {
+                    setSelectedProduct(prod)
+                    cargarVariantes(prod.id)
+                  }}
+                >
+                  {prod.imagen
+                    ? <img src={prod.imagen} alt={prod.nombre} loading="lazy" />
+                    : <span>🔧</span>
+                  }
                 </div>
-                <h3>{prod.nombre}</h3>
-                <p>{prod.descripcion}</p>
 
-                <div className="product-footer">
-                  <span className="product-price">
-                  {tieneVariantes ? (
-                    <>
-                      <span className="price-prefix">Desde</span>
-                      S/ {Number(preciosMinimosVariantes[prod.id] || 0).toFixed(2)}
-                    </>
-                  ) : (
-                    <>S/ {Number(prod.precio || 0).toFixed(2)}</>
-                  )}
-                </span>
+                <div className="product-card__body">
+                  <span className="product-stock">● STOCK</span>
+                  <div className="product-meta">
+                    {prod.marca && <span>{prod.marca}</span>}
+                    {(prod.tipo || prod.categoria?.nombre) && (
+                      <><b>·</b><span>{prod.tipo || prod.categoria?.nombre}</span></>
+                    )}
+                  </div>
+                  <h3>{prod.nombre}</h3>
+                  <p>{prod.descripcion}</p>
 
-  {tieneVariantes ? (
-    <button
-      onClick={() => {
-        setSelectedProduct(prod)
-        cargarVariantes(prod.id)
-      }}
-      className="product-cart-button"
-    >
-      Ver opciones
-    </button>
-  ) : productoEstaEnCarrito(prod.id) ? (
-    <div className="product-qty-controls">
-      <button onClick={() => disminuirCantidad(`${prod.id}`)}>-</button>
+                  <div className="product-footer">
+                    <span className="product-price">
+                      {tieneVariantes ? (
+                        <>
+                          <span className="price-prefix">Desde</span>
+                          S/ {Number(preciosMinimosVariantes[prod.id] || 0).toFixed(2)}
+                        </>
+                      ) : (
+                        <>S/ {Number(prod.precio || 0).toFixed(2)}</>
+                      )}
+                    </span>
 
-      <input
-        className="product-qty-input"
-        type="number"
-        min="1"
-        value={obtenerCantidad(`${prod.id}`)}
-        onChange={(e) =>
-          cambiarCantidad(`${prod.id}`, Number(e.target.value || 1))
-        }
-      />
-
-      <button onClick={() => aumentarCantidad(`${prod.id}`)}>+</button>
-    </div>
-  ) : (
-    <button
-      onClick={() => agregarAlCarrito(prod)}
-      className="product-cart-button"
-    >
-      🛒 Agregar
-    </button>
-  )}
-</div>
+                    {tieneVariantes ? (
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(prod)
+                          cargarVariantes(prod.id)
+                        }}
+                        className="product-cart-button"
+                      >
+                        Ver opciones
+                      </button>
+                    ) : productoEstaEnCarrito(prod.id) ? (
+                      <div className="product-qty-controls">
+                        <button onClick={() => disminuirCantidad(`${prod.id}`)}>-</button>
+                        <input
+                          className="product-qty-input"
+                          type="number"
+                          min="1"
+                          value={obtenerCantidad(`${prod.id}`)}
+                          onChange={(e) =>
+                            cambiarCantidad(`${prod.id}`, Number(e.target.value || 1))
+                          }
+                        />
+                        <button onClick={() => aumentarCantidad(`${prod.id}`)}>+</button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => agregarAlCarrito(prod)}
+                        className="product-cart-button"
+                      >
+                        🛒 Agregar
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-            </div>
             )
-           })}
+          })}
         </div>
 
         {!loading && totalPaginas > 1 && (
@@ -591,20 +559,18 @@ if (!tieneCualquierVariante && precioBase <= 0) {
                 <div className="product-variants">
                   <label>Seleccione una medida:</label>
                   <div className="variant-options">
-  {variantesProducto.map((v) => (
-    <button
-      key={v.id}
-      type="button"
-      className={`variant-option ${
-        varianteSeleccionada?.id === v.id ? "active" : ""
-      }`}
-      onClick={() => setVarianteSeleccionada(v)}
-    >
-      <span>{v.nombre}</span>
-      <strong>S/ {Number(v.precio || 0).toFixed(2)}</strong>
-    </button>
-  ))}
-</div>
+                    {variantesProducto.map((v) => (
+                      <button
+                        key={v.id}
+                        type="button"
+                        className={`variant-option ${varianteSeleccionada?.id === v.id ? "active" : ""}`}
+                        onClick={() => setVarianteSeleccionada(v)}
+                      >
+                        <span>{v.nombre}</span>
+                        <strong>S/ {Number(v.precio || 0).toFixed(2)}</strong>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
               <p className="product-modal__description">
@@ -660,66 +626,31 @@ if (!tieneCualquierVariante && precioBase <= 0) {
                         {item.imagen ? <img src={item.imagen} alt={item.nombre} /> : "🔧"}
                       </div>
                       <div className="cart-item-info">
-
-  <h3>{item.nombre}</h3>
-
-  {item.varianteNombre && (
-    <span className="cart-variant-badge">
-      📏 {item.varianteNombre}
-    </span>
-  )}
-
-  <div className="cart-price-unit">
-    S/ {Number(item.precio || 0).toFixed(2)}
-    <small> c/u</small>
-  </div>
-
-  <div className="cart-qty">
-    <button
-      onClick={() =>
-        cambiarCantidad(item.keyCarrito, item.cantidad - 1)
-      }
-    >
-      −
-    </button>
-
-    <input
-      className="cart-qty-input"
-      type="number"
-      min="1"
-      value={item.cantidad}
-      onChange={(e) =>
-        cambiarCantidad(
-          item.keyCarrito,
-          Number(e.target.value || 1)
-        )
-      }
-    />
-
-    <button
-      onClick={() =>
-        cambiarCantidad(item.keyCarrito, item.cantidad + 1)
-      }
-    >
-      +
-    </button>
-  </div>
-
-  <div className="cart-subtotal">
-    Subtotal:
-    <strong>
-      S/ {(Number(item.precio || 0) * item.cantidad).toFixed(2)}
-    </strong>
-  </div>
-
-  <button
-    className="cart-remove-button"
-    onClick={() => quitarDelCarrito(item.keyCarrito)}
-  >
-    Quitar
-  </button>
-
-</div>
+                        <h3>{item.nombre}</h3>
+                        {item.varianteNombre && (
+                          <span className="cart-variant-badge">📏 {item.varianteNombre}</span>
+                        )}
+                        <div className="cart-price-unit">
+                          S/ {Number(item.precio || 0).toFixed(2)}<small> c/u</small>
+                        </div>
+                        <div className="cart-qty">
+                          <button onClick={() => cambiarCantidad(item.keyCarrito, item.cantidad - 1)}>−</button>
+                          <input
+                            className="cart-qty-input"
+                            type="number"
+                            min="1"
+                            value={item.cantidad}
+                            onChange={(e) => cambiarCantidad(item.keyCarrito, Number(e.target.value || 1))}
+                          />
+                          <button onClick={() => cambiarCantidad(item.keyCarrito, item.cantidad + 1)}>+</button>
+                        </div>
+                        <div className="cart-subtotal">
+                          Subtotal: <strong>S/ {(Number(item.precio || 0) * item.cantidad).toFixed(2)}</strong>
+                        </div>
+                        <button className="cart-remove-button" onClick={() => quitarDelCarrito(item.keyCarrito)}>
+                          Quitar
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -785,113 +716,84 @@ if (!tieneCualquierVariante && precioBase <= 0) {
               </button>
             </div>
             <div className="checkout-summary-card">
-  <h3>
-  Resumen del pedido
-  <span>{totalItemsCarrito} producto{totalItemsCarrito !== 1 ? "s" : ""}</span>
-</h3>
-
-  {carrito.length === 0 ? (
-    <p className="checkout-empty-summary">
-      Aún no tienes productos en el pedido.
-    </p>
-  ) : (
-    <div className="checkout-summary-items">
-      {carrito.map((item) => (
-        <div key={item.keyCarrito} className="checkout-summary-item premium">
-  <div className="checkout-summary-img">
-    {item.imagen ? (
-      <img src={item.imagen} alt={item.nombre} />
-    ) : (
-      <span>🔧</span>
-    )}
-  </div>
-
-  <div className="checkout-summary-info">
-    <strong>{item.nombre}</strong>
-
-    {item.varianteNombre && (
-      <small>📏 {item.varianteNombre}</small>
-    )}
-
-    <span>
-      {item.cantidad} x S/ {Number(item.precio || 0).toFixed(2)}
-    </span>
-  </div>
-
-  <b>
-    S/ {(Number(item.precio || 0) * item.cantidad).toFixed(2)}
-  </b>
-</div>
-      ))}
-    </div>
-  )}
-
-  <div className="checkout-summary-total">
-    <span>Total</span>
-    <strong>S/ {total.toFixed(2)}</strong>
-  </div>
-
-  <div className="checkout-note">
-    <b>Nota:</b> Al confirmar, se registrará el pedido y luego podrás enviar el detalle por WhatsApp.
-  </div>
-</div>
+              <h3>
+                Resumen del pedido
+                <span>{totalItemsCarrito} producto{totalItemsCarrito !== 1 ? "s" : ""}</span>
+              </h3>
+              {carrito.length === 0 ? (
+                <p className="checkout-empty-summary">Aún no tienes productos en el pedido.</p>
+              ) : (
+                <div className="checkout-summary-items">
+                  {carrito.map((item) => (
+                    <div key={item.keyCarrito} className="checkout-summary-item premium">
+                      <div className="checkout-summary-img">
+                        {item.imagen ? <img src={item.imagen} alt={item.nombre} /> : <span>🔧</span>}
+                      </div>
+                      <div className="checkout-summary-info">
+                        <strong>{item.nombre}</strong>
+                        {item.varianteNombre && <small>📏 {item.varianteNombre}</small>}
+                        <span>{item.cantidad} x S/ {Number(item.precio || 0).toFixed(2)}</span>
+                      </div>
+                      <b>S/ {(Number(item.precio || 0) * item.cantidad).toFixed(2)}</b>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="checkout-summary-total">
+                <span>Total</span>
+                <strong>S/ {total.toFixed(2)}</strong>
+              </div>
+              <div className="checkout-note">
+                <b>Nota:</b> Al confirmar, se registrará el pedido y luego podrás enviar el detalle por WhatsApp.
+              </div>
+            </div>
           </div>
         </div>
       )}
+
       {pedidoExitoso && (
-  <div className="success-overlay">
-    <div className="success-modal">
-      <div className="success-icon">✓</div>
-
-      <p className="success-label">Pedido registrado</p>
-
-      <h2>Tu pedido fue creado correctamente</h2>
-
-      <div className="success-details">
-        <span>Código</span>
-        <strong>{pedidoExitoso.codigo}</strong>
-      </div>
-
-      <div className="success-details">
-        <span>Cliente</span>
-        <strong>{pedidoExitoso.cliente}</strong>
-      </div>
-
-      <div className="success-details">
-        <span>Total</span>
-        <strong>S/ {Number(pedidoExitoso.total || 0).toFixed(2)}</strong>
-      </div>
-
-      <p>
-        Ahora puedes enviar el detalle del pedido por WhatsApp a nuestro asesor.
-      </p>
-
-      <div className="success-actions">
-        <button
-          className="success-whatsapp"
-          onClick={() => {
-            window.open(whatsappPedidoUrl, "_blank")
-            setPedidoExitoso(null)
-            setWhatsappPedidoUrl("")
-          }}
-        >
-          Enviar por WhatsApp
-        </button>
-
-        <button
-          className="success-close"
-          onClick={() => {
-            setPedidoExitoso(null)
-            setWhatsappPedidoUrl("")
-          }}
-        >
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+        <div className="success-overlay">
+          <div className="success-modal">
+            <div className="success-icon">✓</div>
+            <p className="success-label">Pedido registrado</p>
+            <h2>Tu pedido fue creado correctamente</h2>
+            <div className="success-details">
+              <span>Código</span>
+              <strong>{pedidoExitoso.codigo}</strong>
+            </div>
+            <div className="success-details">
+              <span>Cliente</span>
+              <strong>{pedidoExitoso.cliente}</strong>
+            </div>
+            <div className="success-details">
+              <span>Total</span>
+              <strong>S/ {Number(pedidoExitoso.total || 0).toFixed(2)}</strong>
+            </div>
+            <p>Ahora puedes enviar el detalle del pedido por WhatsApp a nuestro asesor.</p>
+            <div className="success-actions">
+              <button
+                className="success-whatsapp"
+                onClick={() => {
+                  window.open(whatsappPedidoUrl, "_blank")
+                  setPedidoExitoso(null)
+                  setWhatsappPedidoUrl("")
+                }}
+              >
+                Enviar por WhatsApp
+              </button>
+              <button
+                className="success-close"
+                onClick={() => {
+                  setPedidoExitoso(null)
+                  setWhatsappPedidoUrl("")
+                }}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   )
 }
