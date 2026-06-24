@@ -1553,276 +1553,91 @@
   }
 }
 
-/* Product modal responsive consistency V1 */
-.product-modal__content {
-  width: min(92vw, 1100px);
-  height: min(720px, calc(100vh - 120px));
-  min-height: 0;
-  max-height: calc(100vh - 120px);
-  align-items: stretch;
-}
-
-.product-modal__image {
-  height: 100%;
-  min-height: 0;
-  padding: clamp(20px, 2.2vw, 32px);
-  align-items: center;
-  justify-content: center;
-}
-
-.product-modal__image img {
-  width: 100%;
-  height: 100%;
-  max-width: 430px;
-  max-height: clamp(380px, 62vh, 560px);
-  object-fit: contain;
-}
-
-.product-modal__info {
-  height: 100%;
-  min-height: 0;
-  max-height: calc(100vh - 120px);
-  padding: clamp(30px, 3vw, 48px);
-  justify-content: flex-start;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.product-modal__info h2 {
-  min-height: 0;
-  margin: 0 0 18px;
-  font-size: clamp(30px, 3.2vw, 48px);
-  line-height: 1.08;
-}
-
-.product-modal__badges {
-  margin-top: 0;
-}
-
-.product-modal__description {
-  margin-top: 18px;
-}
-
-.product-modal__button {
-  flex-shrink: 0;
-  margin-top: 20px;
-}
-
-@media (min-width: 900px) and (max-width: 1400px) {
-  .product-modal__content {
-    grid-template-columns: 420px minmax(0, 1fr);
-  }
-
-  .product-modal__image {
-    padding: 20px;
-  }
-
-  .product-modal__image img {
-    max-width: 380px;
-    max-height: clamp(340px, 58vh, 460px);
-  }
-
-  .product-modal__info {
-    padding: 28px 34px;
-  }
-
-  .product-modal__label {
-    margin-bottom: 10px;
-  }
-
-  .product-modal__info h2 {
-    margin-bottom: 14px;
-    font-size: clamp(30px, 3vw, 42px);
-    line-height: 1.08;
-  }
-
-  .product-modal__badges {
-    gap: 7px;
-  }
-
-  .product-modal__badges span {
-    padding: 6px 10px;
-  }
-
-  .product-modal__price {
-    margin-top: 16px;
-    font-size: 32px;
-  }
-
-  .product-variants {
-    margin: 14px 0 12px;
-  }
-
-  .product-variants label {
-    margin-bottom: 10px;
-  }
-
-  .variant-options {
-    height: 124px;
-    max-height: 124px;
-    gap: 9px;
-    margin-bottom: 10px;
-  }
-
-  .variant-option {
-    min-height: 52px;
-    padding: 7px 9px;
-  }
-
-  .product-modal__description {
-    margin-top: 14px;
-    font-size: 14px;
-    line-height: 1.55;
-  }
-
-  .product-modal__button {
-    margin-top: 16px;
-    min-width: 230px;
-    padding: 14px 22px;
-  }
-}
-
-@media (max-width: 760px) {
+/* Product modal proportional scaling V1 */
+@media (min-width: 761px) {
   .product-modal {
-    padding: 14px;
+    padding: clamp(16px, 2.2vh, 24px);
   }
 
   .product-modal__content {
-    width: min(94vw, 620px);
+    width: min(92vw, 1100px);
     height: auto;
-    min-height: 0;
-    max-height: 92vh;
-    overflow-y: auto;
-  }
-
-  .product-modal__image {
-    height: 280px;
-    min-height: 280px;
-    padding: 18px;
-  }
-
-  .product-modal__image img {
-    max-width: 300px;
-    max-height: 245px;
-  }
-
-  .product-modal__info {
-    height: auto;
-    min-height: 0;
-    max-height: none;
-    padding: 26px 24px 30px;
-    overflow-y: visible;
-  }
-
-  .product-modal__info h2 {
-    margin-bottom: 14px;
-    font-size: clamp(26px, 8vw, 38px);
-  }
-}
-
-/* Product modal laptop height fix V2 */
-.product-modal__info > * {
-  flex-shrink: 0;
-}
-
-.product-modal__info h2 {
-  display: block;
-  position: relative;
-  min-height: max-content;
-}
-
-.product-modal__badges {
-  position: static;
-  clear: both;
-}
-
-@media (min-width: 761px) and (max-height: 1050px) {
-  .product-modal {
-    padding: 18px;
-  }
-
-  .product-modal__content {
-    width: min(90vw, 1080px);
-    height: calc(100vh - 100px);
-    max-height: calc(100vh - 100px);
+    min-height: clamp(540px, 72vh, 620px);
+    max-height: calc(100vh - 72px);
     grid-template-columns: minmax(360px, 42%) minmax(0, 1fr);
   }
 
   .product-modal__image {
-    padding: 14px;
+    height: auto;
+    min-height: clamp(540px, 72vh, 620px);
+    padding: clamp(18px, 3vh, 26px);
   }
 
   .product-modal__image img {
-    max-width: 100%;
-    max-height: calc(100vh - 150px);
-    transform: scale(1.06);
+    max-width: clamp(350px, 36vw, 430px);
+    max-height: clamp(360px, 58vh, 520px);
   }
 
   .product-modal__info {
-    max-height: calc(100vh - 100px);
-    padding: 24px 30px 26px;
+    height: auto;
+    min-height: clamp(540px, 72vh, 620px);
+    max-height: calc(100vh - 72px);
+    padding: clamp(24px, 4vh, 48px) clamp(28px, 3.2vw, 48px);
+    overflow-y: auto;
+  }
+
+  .product-modal__info > * {
+    flex-shrink: 0;
   }
 
   .product-modal__label {
-    margin: 0 0 8px;
+    margin-bottom: clamp(8px, 1.5vh, 14px);
   }
 
   .product-modal__info h2 {
-    margin: 0 0 14px;
-    font-size: clamp(28px, 2.65vw, 39px);
+    min-height: auto;
+    margin-bottom: 0;
+    font-size: clamp(30px, 4.5vh, 48px);
     line-height: 1.08;
   }
 
   .product-modal__badges {
-    gap: 6px;
-    margin: 0;
-  }
-
-  .product-modal__badges span {
-    padding: 5px 9px;
-    font-size: 9px;
+    margin-top: clamp(12px, 2vh, 18px);
   }
 
   .product-modal__price {
-    margin-top: 14px;
-    font-size: 30px;
+    margin-top: clamp(14px, 2.4vh, 22px);
+    font-size: clamp(30px, 4.2vh, 38px);
   }
 
   .product-variants {
-    margin: 12px 0 8px;
+    margin: clamp(12px, 2vh, 18px) 0 clamp(12px, 2vh, 22px);
   }
 
   .product-variants label {
-    margin-bottom: 8px;
+    margin-bottom: clamp(8px, 1.5vh, 14px);
   }
 
   .variant-options {
-    height: auto;
-    max-height: 112px;
-    gap: 8px;
-    padding-top: 3px;
-    margin-bottom: 6px;
+    height: clamp(105px, 16vh, 150px);
+    max-height: clamp(105px, 16vh, 150px);
+    gap: clamp(8px, 1.2vh, 12px);
+    margin-bottom: clamp(8px, 1.5vh, 18px);
   }
 
   .variant-option {
-    min-height: 48px;
-    padding: 6px 8px;
-  }
-
-  .variant-option span,
-  .variant-option strong {
-    font-size: 12px;
+    min-height: clamp(48px, 7vh, 58px);
+    padding: 7px 9px;
   }
 
   .product-modal__description {
-    margin-top: 12px;
-    font-size: 13px;
-    line-height: 1.5;
+    margin-top: clamp(12px, 2vh, 24px);
+    font-size: clamp(13px, 1.7vh, 16px);
+    line-height: 1.6;
   }
 
   .product-modal__button {
-    min-width: 220px;
-    margin-top: 14px;
-    padding: 13px 20px;
+    margin-top: clamp(14px, 2.4vh, 30px);
+    padding: clamp(13px, 1.8vh, 15px) 24px;
   }
 }
