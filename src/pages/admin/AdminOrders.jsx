@@ -6,6 +6,13 @@ import { API_URL } from "../../config/api"
 function AdminOrders() {
   const [pedidos, setPedidos] = useState([])
   const [loading, setLoading] = useState(true)
+  /* Order filters V1 */
+  const [busquedaPedido, setBusquedaPedido] = useState("")
+  const [filtroEstadoPedido, setFiltroEstadoPedido] = useState("TODOS")
+  const [filtroFechaPedido, setFiltroFechaPedido] = useState("TODAS")
+  /* Order pagination V1 */
+  const [pedidosPorPagina, setPedidosPorPagina] = useState(10)
+  const [paginaPedidos, setPaginaPedidos] = useState(1)
 
   const cargarPedidos = async () => {
     try {
@@ -31,6 +38,75 @@ function AdminOrders() {
       alert("No se pudo actualizar el estado")
     }
   }
+
+  const inicioDelDia = (fecha) =>
+    new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate())
+
+  const pedidoCoincideFecha = (pedido) => {
+    if (filtroFechaPedido === "TODAS") return true
+
+    const fechaPedido = new Date(pedido.fechaCreacion)
+    if (Number.isNaN(fechaPedido.getTime())) return false
+
+    const hoy = inicioDelDia(new Date())
+    const fecha = inicioDelDia(fechaPedido)
+
+    if (filtroFechaPedido === "HOY") {
+      return fecha.getTime() === hoy.getTime()
+    }
+
+    if (filtroFechaPedido === "SEMANA") {
+      const inicioSemana = new Date(hoy)
+      const diaSemana = (hoy.getDay() + 6) % 7
+      inicioSemana.setDate(hoy.getDate() - diaSemana)
+      return fecha >= inicioSemana && fecha <= hoy
+    }
+
+    if (filtroFechaPedido === "MES") {
+      return (
+        fecha.getFullYear() === hoy.getFullYear() &&
+        fecha.getMonth() === hoy.getMonth()
+      )
+    }
+
+    return true
+  }
+
+  const pedidosFiltrados = pedidos.filter((pedido) => {
+    const texto =
+      `${pedido.codigo || ""} ${pedido.cliente || ""} ${pedido.telefono || ""}`.toLowerCase()
+    const coincideBusqueda = texto.includes(busquedaPedido.toLowerCase())
+    const coincideEstado =
+      filtroEstadoPedido === "TODOS" ||
+      (pedido.estado || "PENDIENTE").toUpperCase() === filtroEstadoPedido
+
+    return coincideBusqueda && coincideEstado && pedidoCoincideFecha(pedido)
+  })
+
+  const totalPedidos = pedidos.length
+  const totalPendientes = pedidos.filter(
+    (pedido) => (pedido.estado || "PENDIENTE").toUpperCase() === "PENDIENTE"
+  ).length
+  const totalEnProceso = pedidos.filter(
+    (pedido) => (pedido.estado || "").toUpperCase() === "EN_PROCESO"
+  ).length
+  const totalEntregados = pedidos.filter(
+    (pedido) => (pedido.estado || "").toUpperCase() === "ENTREGADO"
+  ).length
+  const totalAnulados = pedidos.filter(
+    (pedido) => (pedido.estado || "").toUpperCase() === "ANULADO"
+  ).length
+
+  const totalPaginasPedidos = Math.max(
+    1,
+    Math.ceil(pedidosFiltrados.length / pedidosPorPagina)
+  )
+  const paginaPedidosSegura = Math.min(paginaPedidos, totalPaginasPedidos)
+  const indiceInicialPedidos = (paginaPedidosSegura - 1) * pedidosPorPagina
+  const pedidosPaginados = pedidosFiltrados.slice(
+    indiceInicialPedidos,
+    indiceInicialPedidos + pedidosPorPagina
+  )
 
   return (
     <AdminLayout>
@@ -59,8 +135,86 @@ function AdminOrders() {
           </div>
         )}
 
+        {!loading && pedidos.length > 0 && (
+          <div className="admin-orders-tools">
+            <div className="admin-orders-stats">
+              <div>
+                <strong>{totalPedidos}</strong>
+                <span>Total</span>
+              </div>
+              <div>
+                <strong>{totalPendientes}</strong>
+                <span>Pendientes</span>
+              </div>
+              <div>
+                <strong>{totalEnProceso}</strong>
+                <span>En proceso</span>
+              </div>
+              <div>
+                <strong>{totalEntregados}</strong>
+                <span>Entregados</span>
+              </div>
+              <div>
+                <strong>{totalAnulados}</strong>
+                <span>Anulados</span>
+              </div>
+            </div>
+
+            <div className="admin-orders-filters">
+              <input
+                placeholder="Buscar por código, cliente o teléfono..."
+                value={busquedaPedido}
+                onChange={(e) => {
+                  setBusquedaPedido(e.target.value)
+                  setPaginaPedidos(1)
+                }}
+              />
+
+              <select
+                value={filtroEstadoPedido}
+                onChange={(e) => {
+                  setFiltroEstadoPedido(e.target.value)
+                  setPaginaPedidos(1)
+                }}
+              >
+                <option value="TODOS">Todos los estados</option>
+                <option value="PENDIENTE">Pendiente</option>
+                <option value="CONFIRMADO">Confirmado</option>
+                <option value="EN_PROCESO">En proceso</option>
+                <option value="ENTREGADO">Entregado</option>
+                <option value="ANULADO">Anulado</option>
+              </select>
+
+              <select
+                value={filtroFechaPedido}
+                onChange={(e) => {
+                  setFiltroFechaPedido(e.target.value)
+                  setPaginaPedidos(1)
+                }}
+              >
+                <option value="TODAS">Todas las fechas</option>
+                <option value="HOY">Hoy</option>
+                <option value="SEMANA">Esta semana</option>
+                <option value="MES">Este mes</option>
+              </select>
+
+              <select
+                value={pedidosPorPagina}
+                onChange={(e) => {
+                  setPedidosPorPagina(Number(e.target.value))
+                  setPaginaPedidos(1)
+                }}
+              >
+                <option value={10}>10 por página</option>
+                <option value={20}>20 por página</option>
+                <option value={50}>50 por página</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         <div className="admin-orders-list">
-          {pedidos.map((pedido) => (
+          {pedidosPaginados.map((pedido) => (
             <div key={pedido.id} className="admin-order-card">
               <div className="admin-order-header">
                 <div>
@@ -134,6 +288,42 @@ function AdminOrders() {
             </div>
           ))}
         </div>
+
+        {!loading && pedidos.length > 0 && pedidosFiltrados.length === 0 && (
+          <div className="admin-orders-no-results">
+            No hay pedidos que coincidan con los filtros.
+          </div>
+        )}
+
+        {!loading && pedidosFiltrados.length > 0 && (
+          <div className="admin-orders-pagination">
+            <button
+              type="button"
+              disabled={paginaPedidosSegura === 1}
+              onClick={() =>
+                setPaginaPedidos(Math.max(1, paginaPedidosSegura - 1))
+              }
+            >
+              Anterior
+            </button>
+
+            <span>
+              Página {paginaPedidosSegura} de {totalPaginasPedidos}
+            </span>
+
+            <button
+              type="button"
+              disabled={paginaPedidosSegura === totalPaginasPedidos}
+              onClick={() =>
+                setPaginaPedidos(
+                  Math.min(totalPaginasPedidos, paginaPedidosSegura + 1)
+                )
+              }
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
       </section>
     </AdminLayout>
   )

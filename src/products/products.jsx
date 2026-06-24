@@ -358,10 +358,13 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
     return coincideBusqueda && coincideCategoria
   })
 
-  const indiceUltimoProducto = paginaActual * productosPorPagina
+  /* Reset pagination on filters V1 */
+  const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina)
+  const paginaActualSegura =
+    totalPaginas > 0 ? Math.min(paginaActual, totalPaginas) : 1
+  const indiceUltimoProducto = paginaActualSegura * productosPorPagina
   const indicePrimerProducto = indiceUltimoProducto - productosPorPagina
   const productosPaginados = productosFiltrados.slice(indicePrimerProducto, indiceUltimoProducto)
-  const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina)
 
   return (
     <section id="productos" ref={prodRef} className="catalog-section">
@@ -398,7 +401,10 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
               type="text"
               placeholder="Buscar productos..."
               value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
+              onChange={(e) => {
+                setBusqueda(e.target.value)
+                setPaginaActual(1)
+              }}
             />
           </div>
           <div className="catalog-filter-pills">
@@ -406,7 +412,10 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
               <button
                 key={cat}
                 className={categoriaActiva === cat ? "active" : ""}
-                onClick={() => setCategoriaSeleccionada(cat)}
+                onClick={() => {
+                  setCategoriaSeleccionada(cat)
+                  setPaginaActual(1)
+                }}
               >
                 {cat}
               </button>
@@ -534,11 +543,19 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
 
         {!loading && totalPaginas > 1 && (
           <div className="catalog-pagination">
-            <button type="button" disabled={paginaActual === 1} onClick={() => setPaginaActual((prev) => prev - 1)}>
+            <button
+              type="button"
+              disabled={paginaActualSegura === 1}
+              onClick={() => setPaginaActual(paginaActualSegura - 1)}
+            >
               ← Anterior
             </button>
-            <span>Página {paginaActual} de {totalPaginas}</span>
-            <button type="button" disabled={paginaActual === totalPaginas} onClick={() => setPaginaActual((prev) => prev + 1)}>
+            <span>Página {paginaActualSegura} de {totalPaginas}</span>
+            <button
+              type="button"
+              disabled={paginaActualSegura === totalPaginas}
+              onClick={() => setPaginaActual(paginaActualSegura + 1)}
+            >
               Siguiente →
             </button>
           </div>

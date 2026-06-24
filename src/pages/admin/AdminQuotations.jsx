@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
@@ -33,11 +33,25 @@ const leerBorradorCotizacion = () => {
 }
 
 function AdminQuotations() {
+  /* Excel-like quotation rows V1 */
+  const itemInputRefs = useRef({
+    descripcion: [],
+    cantidad: [],
+    precioUnitario: [],
+  })
+  const pendingItemFocus = useRef(null)
+
   const [borradorInicial] = useState(leerBorradorCotizacion)
   const [cotizaciones, setCotizaciones] = useState([])
   const [loading, setLoading] = useState(true)
   const [cotizacionEditandoId, setCotizacionEditandoId] = useState(null)
   const [filtroCotizacion, setFiltroCotizacion] = useState("")
+  /* Quotation filters V2 */
+  const [filtroEstado, setFiltroEstado] = useState("TODAS")
+  const [filtroFecha, setFiltroFecha] = useState("TODAS")
+  /* Quotation pagination V2 */
+  const [cotizacionesPorPagina, setCotizacionesPorPagina] = useState(10)
+  const [paginaCotizaciones, setPaginaCotizaciones] = useState(1)
   const [sugerencias, setSugerencias] = useState({})
   const [importOpen, setImportOpen] = useState(false)
   const [textoImportacion, setTextoImportacion] = useState("")
@@ -106,6 +120,18 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
     return () => clearTimeout(timeoutId)
   }, [avisoBorrador])
 
+  useEffect(() => {
+    if (!pendingItemFocus.current) return undefined
+
+    const animationFrame = requestAnimationFrame(() => {
+      const { field, index } = pendingItemFocus.current
+      itemInputRefs.current[field]?.[index]?.focus()
+      pendingItemFocus.current = null
+    })
+
+    return () => cancelAnimationFrame(animationFrame)
+  }, [items.length])
+
   const limpiarBorrador = () => {
     localStorage.removeItem(QUOTATION_DRAFT_KEY)
     setCliente({ ...clienteVacio })
@@ -152,21 +178,108 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   }
 
   const agregarItem = () => {
-    setItems([
-      ...items,
-      {
-        descripcion: "",
-        cantidad: 1,
-        precioUnitario: 0,
-      },
-    ])
+    setItems((prev) => [...prev, { ...itemVacio }])
+  }
+
+  /* Excel-like navigation V2 */
+  const handleItemNavigation = (event, index, field) => {
+    const isEnter = event.key === "Enter"
+    const isArrowDown = event.key === "ArrowDown"
+    const isArrowUp = event.key === "ArrowUp"
+
+    if (!isEnter && !isArrowDown && !isArrowUp) return
+
+    event.preventDefault()
+
+    if (isArrowUp) {
+      if (index > 0) {
+        itemInputRefs.current[field]?.[index - 1]?.focus()
+      }
+      return
+    }
+
+    const nextIndex = index + 1
+
+    if (nextIndex < items.length) {
+      itemInputRefs.current[field]?.[nextIndex]?.focus()
+      return
+    }
+
+    if (isEnter) {
+      pendingItemFocus.current = { field, index: nextIndex }
+      agregarItem()
+    }
+  }
+
+  const inicioDelDia = (fecha) =>
+    new Date(fecha.getFullYear(), fecha.getMonth(), fecha.getDate())
+
+  const cotizacionCoincideFecha = (cot) => {
+    if (filtroFecha === "TODAS") return true
+
+    const fechaCotizacion = new Date(cot.fechaCreacion)
+    if (Number.isNaN(fechaCotizacion.getTime())) return false
+
+    const hoy = inicioDelDia(new Date())
+    const fecha = inicioDelDia(fechaCotizacion)
+
+    if (filtroFecha === "HOY") {
+      return fecha.getTime() === hoy.getTime()
+    }
+
+    if (filtroFecha === "SEMANA") {
+      const inicioSemana = new Date(hoy)
+      const diaSemana = (hoy.getDay() + 6) % 7
+      inicioSemana.setDate(hoy.getDate() - diaSemana)
+      return fecha >= inicioSemana && fecha <= hoy
+    }
+
+    if (filtroFecha === "MES") {
+      return (
+        fecha.getFullYear() === hoy.getFullYear() &&
+        fecha.getMonth() === hoy.getMonth()
+      )
+    }
+
+    return true
   }
 
   const cotizacionesFiltradas = cotizaciones.filter((cot) => {
-  const texto = `${cot.codigo || ""} ${cot.cliente || ""} ${cot.ruc || ""} ${cot.telefono || ""}`.toLowerCase()
+    const texto =
+      `${cot.codigo || ""} ${cot.cliente || ""} ${cot.ruc || ""} ${cot.telefono || ""}`.toLowerCase()
+    const coincideBusqueda = texto.includes(filtroCotizacion.toLowerCase())
+    const coincideEstado =
+      filtroEstado === "TODAS" ||
+      (cot.estado || "GENERADA").toUpperCase() === filtroEstado
 
-  return texto.includes(filtroCotizacion.toLowerCase())
-})
+    return coincideBusqueda && coincideEstado && cotizacionCoincideFecha(cot)
+  })
+
+  const totalCotizaciones = cotizaciones.length
+  const totalGeneradas = cotizaciones.filter(
+    (cot) => (cot.estado || "GENERADA").toUpperCase() === "GENERADA"
+  ).length
+  const totalAprobadas = cotizaciones.filter(
+    (cot) => (cot.estado || "").toUpperCase() === "APROBADA"
+  ).length
+  const totalAnuladas = cotizaciones.filter(
+    (cot) => (cot.estado || "").toUpperCase() === "ANULADA"
+  ).length
+
+  const totalPaginasCotizaciones = Math.max(
+    1,
+    Math.ceil(cotizacionesFiltradas.length / cotizacionesPorPagina)
+  )
+  const paginaCotizacionesSegura = Math.min(
+    paginaCotizaciones,
+    totalPaginasCotizaciones
+  )
+  const indiceInicialCotizaciones =
+    (paginaCotizacionesSegura - 1) * cotizacionesPorPagina
+  const cotizacionesPaginadas = cotizacionesFiltradas.slice(
+    indiceInicialCotizaciones,
+    indiceInicialCotizaciones + cotizacionesPorPagina
+  )
 
   const quitarItem = (index) => {
     if (items.length === 1) return
@@ -440,6 +553,7 @@ Gracias por confiar en W&G Corporación Goicha.`
       ...cliente,
       detalles: itemsValidos.map((item) => ({
         descripcion: item.descripcion,
+        /* PDF quantity format V1: se envía como número; el formato visual pertenece al generador PDF. */
         cantidad: Number(item.cantidad || 1),
         precioUnitario: Number(item.precioUnitario || 0),
       })),
@@ -587,9 +701,15 @@ Gracias por confiar en W&G Corporación Goicha.`
                 </div>
                   <div className="quotation-autocomplete">
   <input
+    ref={(element) => {
+      itemInputRefs.current.descripcion[index] = element
+    }}
     className="quotation-description"
     placeholder="Descripción del producto"
     value={item.descripcion}
+    onKeyDown={(event) =>
+      handleItemNavigation(event, index, "descripcion")
+    }
     onChange={(e) => {
       handleItemChange(index, "descripcion", e.target.value)
       buscarProductosInternos(index, e.target.value)
@@ -621,22 +741,36 @@ Gracias por confiar en W&G Corporación Goicha.`
 </div>
 
                   <input
+                    ref={(element) => {
+                      itemInputRefs.current.cantidad[index] = element
+                    }}
                     type="number"
                     placeholder="Cant."
                     value={item.cantidad}
                     min="0"
                     step="0.01"
+                    onKeyDown={(event) =>
+                      handleItemNavigation(event, index, "cantidad")
+                    }
+                    onWheel={(event) => event.currentTarget.blur()}
                     onChange={(e) =>
                       handleItemChange(index, "cantidad", e.target.value)
                     }
                   />
 
                   <input
+                    ref={(element) => {
+                      itemInputRefs.current.precioUnitario[index] = element
+                    }}
                     type="number"
                     placeholder="P. Unit."
                     value={item.precioUnitario}
                     min="0"
                     step="0.01"
+                    onKeyDown={(event) =>
+                      handleItemNavigation(event, index, "precioUnitario")
+                    }
+                    onWheel={(event) => event.currentTarget.blur()}
                     onChange={(e) =>
                       handleItemChange(index, "precioUnitario", e.target.value)
                     }
@@ -707,6 +841,25 @@ Gracias por confiar en W&G Corporación Goicha.`
         <div className="quotation-list-card">
           <h2>Cotizaciones recientes</h2>
 
+          <div className="quotation-list-stats">
+            <div>
+              <strong>{totalCotizaciones}</strong>
+              <span>Total</span>
+            </div>
+            <div>
+              <strong>{totalGeneradas}</strong>
+              <span>Generadas</span>
+            </div>
+            <div>
+              <strong>{totalAprobadas}</strong>
+              <span>Aprobadas</span>
+            </div>
+            <div>
+              <strong>{totalAnuladas}</strong>
+              <span>Anuladas</span>
+            </div>
+          </div>
+
           {loading && <p className="admin-empty">Cargando cotizaciones...</p>}
 
           {!loading && cotizaciones.length === 0 && (
@@ -714,16 +867,57 @@ Gracias por confiar en W&G Corporación Goicha.`
           )}
 
           <div className="quotation-filter">
-  <input
-    placeholder="Buscar por código, cliente, RUC o teléfono..."
-    value={filtroCotizacion}
-    onChange={(e) => setFiltroCotizacion(e.target.value)}
-  />
-</div>
+            <input
+              placeholder="Buscar por código, cliente, RUC o teléfono..."
+              value={filtroCotizacion}
+              onChange={(e) => {
+                setFiltroCotizacion(e.target.value)
+                setPaginaCotizaciones(1)
+              }}
+            />
+
+            <select
+              value={filtroEstado}
+              onChange={(e) => {
+                setFiltroEstado(e.target.value)
+                setPaginaCotizaciones(1)
+              }}
+            >
+              <option value="TODAS">Todos los estados</option>
+              <option value="GENERADA">Generada</option>
+              <option value="APROBADA">Aprobada</option>
+              <option value="ANULADA">Anulada</option>
+            </select>
+
+            <select
+              value={filtroFecha}
+              onChange={(e) => {
+                setFiltroFecha(e.target.value)
+                setPaginaCotizaciones(1)
+              }}
+            >
+              <option value="TODAS">Todas las fechas</option>
+              <option value="HOY">Hoy</option>
+              <option value="SEMANA">Esta semana</option>
+              <option value="MES">Este mes</option>
+            </select>
+
+            <select
+              value={cotizacionesPorPagina}
+              onChange={(e) => {
+                setCotizacionesPorPagina(Number(e.target.value))
+                setPaginaCotizaciones(1)
+              }}
+            >
+              <option value={10}>10 por página</option>
+              <option value={20}>20 por página</option>
+              <option value={50}>50 por página</option>
+            </select>
+          </div>
 </div>
 
           <div className="quotation-list">
-  {cotizacionesFiltradas.map((cot) => (
+  {cotizacionesPaginadas.map((cot) => (
     <div key={cot.id} className="quotation-list-item">
       <div className="quotation-list-main">
         <div>
@@ -737,6 +931,7 @@ Gracias por confiar en W&G Corporación Goicha.`
   <option value="GENERADA">GENERADA</option>
   <option value="ENVIADA">ENVIADA</option>
   <option value="APROBADA">APROBADA</option>
+  <option value="ANULADA">ANULADA</option>
   <option value="RECHAZADA">RECHAZADA</option>
 </select>
           </div>
@@ -791,6 +986,47 @@ Gracias por confiar en W&G Corporación Goicha.`
     </div>
   ))}
 </div>
+
+        {!loading && cotizacionesFiltradas.length === 0 && cotizaciones.length > 0 && (
+          <p className="quotation-list-empty">
+            No hay cotizaciones que coincidan con los filtros.
+          </p>
+        )}
+
+        {!loading && cotizacionesFiltradas.length > 0 && (
+          <div className="quotation-pagination">
+            <button
+              type="button"
+              disabled={paginaCotizacionesSegura === 1}
+              onClick={() =>
+                setPaginaCotizaciones(
+                  Math.max(1, paginaCotizacionesSegura - 1)
+                )
+              }
+            >
+              Anterior
+            </button>
+
+            <span>
+              Página {paginaCotizacionesSegura} de {totalPaginasCotizaciones}
+            </span>
+
+            <button
+              type="button"
+              disabled={paginaCotizacionesSegura === totalPaginasCotizaciones}
+              onClick={() =>
+                setPaginaCotizaciones(
+                  Math.min(
+                    totalPaginasCotizaciones,
+                    paginaCotizacionesSegura + 1
+                  )
+                )
+              }
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
 
         {importOpen && (
   <div className="import-modal-overlay">

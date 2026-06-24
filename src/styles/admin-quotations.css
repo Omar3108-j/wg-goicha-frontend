@@ -850,6 +850,12 @@
   border: 1px solid rgba(220, 38, 38, 0.15);
 }
 
+.quotation-status-select.anulada {
+  background: rgba(100, 116, 139, 0.14);
+  color: #475569;
+  border: 1px solid rgba(100, 116, 139, 0.2);
+}
+
 /* Responsive cotizaciones móvil V1 */
 @media (max-width: 700px) {
   .quotation-layout,
@@ -959,5 +965,184 @@
     justify-self: end;
     width: 42px;
     height: 42px;
+  }
+}
+
+/* Sticky quotation summary V1 */
+@media (min-width: 1201px) {
+  .quotation-summary-wrapper {
+    position: sticky !important;
+    top: 24px !important;
+    align-self: start;
+    height: fit-content;
+  }
+
+  .quotation-summary-card {
+    position: static;
+  }
+}
+
+@media (max-width: 1200px) {
+  .quotation-summary-wrapper {
+    position: static !important;
+    top: auto !important;
+  }
+}
+
+/* Excel-like navigation V2 */
+.quotation-item-row input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.quotation-item-row input[type="number"]::-webkit-inner-spin-button,
+.quotation-item-row input[type="number"]::-webkit-outer-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+/* Quotation filters V2 */
+.quotation-list-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.quotation-list-stats div {
+  padding: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.quotation-list-stats strong {
+  display: block;
+  color: #0f172a;
+  font-size: 26px;
+  font-weight: 950;
+}
+
+.quotation-list-stats span {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.quotation-filter {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) repeat(3, minmax(150px, auto));
+  gap: 12px;
+  align-items: center;
+}
+
+.quotation-filter input,
+.quotation-filter select {
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #111827;
+  padding: 0 15px;
+  font-size: 14px;
+  font-weight: 800;
+  outline: none;
+}
+
+.quotation-filter input:focus,
+.quotation-filter select:focus {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
+}
+
+.quotation-list-empty {
+  margin: 18px 0 0;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.04);
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* Quotation pagination V2 */
+.quotation-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.quotation-pagination button {
+  min-width: 110px;
+  padding: 12px 17px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #fff;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.quotation-pagination button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.quotation-pagination button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.quotation-pagination span {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+@media (max-width: 1000px) {
+  .quotation-filter {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .quotation-list-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .quotation-list-stats div {
+    padding: 13px;
+  }
+
+  .quotation-list-stats strong {
+    font-size: 22px;
+  }
+
+  .quotation-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .quotation-pagination {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .quotation-pagination span {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: center;
+  }
+
+  .quotation-pagination button {
+    width: 100%;
+    min-width: 0;
   }
 }
