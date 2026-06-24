@@ -3,7 +3,37 @@ import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
 
+/* Cotizaciones draft V1 */
+const QUOTATION_DRAFT_KEY = "wg-admin-quotation-draft"
+
+const clienteVacio = {
+  cliente: "",
+  ruc: "",
+  telefono: "",
+  correo: "",
+  direccion: "",
+  observaciones: "",
+}
+
+const itemVacio = {
+  descripcion: "",
+  cantidad: 1,
+  precioUnitario: 0,
+}
+
+const leerBorradorCotizacion = () => {
+  try {
+    const borrador = localStorage.getItem(QUOTATION_DRAFT_KEY)
+    return borrador ? JSON.parse(borrador) : null
+  } catch (error) {
+    console.error("Error recuperando borrador de cotización:", error)
+    localStorage.removeItem(QUOTATION_DRAFT_KEY)
+    return null
+  }
+}
+
 function AdminQuotations() {
+  const [borradorInicial] = useState(leerBorradorCotizacion)
   const [cotizaciones, setCotizaciones] = useState([])
   const [loading, setLoading] = useState(true)
   const [cotizacionEditandoId, setCotizacionEditandoId] = useState(null)
@@ -12,23 +42,20 @@ function AdminQuotations() {
   const [importOpen, setImportOpen] = useState(false)
   const [textoImportacion, setTextoImportacion] = useState("")
   const [modoDuplicado, setModoDuplicado] = useState(false)
+  const [avisoBorrador, setAvisoBorrador] = useState(
+    borradorInicial ? "Borrador recuperado" : ""
+  )
 
-  const [cliente, setCliente] = useState({
-    cliente: "",
-    ruc: "",
-    telefono: "",
-    correo: "",
-    direccion: "",
-    observaciones: "",
-  })
+  const [cliente, setCliente] = useState(() => ({
+    ...clienteVacio,
+    ...(borradorInicial?.cliente || {}),
+  }))
 
-  const [items, setItems] = useState([
-    {
-      descripcion: "",
-      cantidad: 1,
-      precioUnitario: 0,
-    },
-  ])
+  const [items, setItems] = useState(() =>
+    Array.isArray(borradorInicial?.items) && borradorInicial.items.length
+      ? borradorInicial.items
+      : [{ ...itemVacio }]
+  )
 
   const cargarCotizaciones = async () => {
     try {
@@ -45,6 +72,48 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   useEffect(() => {
     cargarCotizaciones()
   }, [])
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const clienteTieneDatos = Object.values(cliente).some((valor) =>
+        String(valor || "").trim()
+      )
+      const productosTienenDatos = items.some(
+        (item) =>
+          String(item.descripcion || "").trim() ||
+          Number(item.precioUnitario || 0) !== 0 ||
+          Number(item.cantidad ?? 1) !== 1
+      )
+
+      if (!clienteTieneDatos && !productosTienenDatos) {
+        localStorage.removeItem(QUOTATION_DRAFT_KEY)
+        return
+      }
+
+      localStorage.setItem(
+        QUOTATION_DRAFT_KEY,
+        JSON.stringify({ cliente, items })
+      )
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+  }, [cliente, items])
+
+  useEffect(() => {
+    if (!avisoBorrador) return undefined
+
+    const timeoutId = setTimeout(() => setAvisoBorrador(""), 3500)
+    return () => clearTimeout(timeoutId)
+  }, [avisoBorrador])
+
+  const limpiarBorrador = () => {
+    localStorage.removeItem(QUOTATION_DRAFT_KEY)
+    setCliente({ ...clienteVacio })
+    setItems([{ ...itemVacio }])
+    setCotizacionEditandoId(null)
+    setModoDuplicado(false)
+    setAvisoBorrador("Borrador limpiado")
+  }
 
   const handleClienteChange = (e) => {
     setCliente({
@@ -406,6 +475,8 @@ Gracias por confiar en W&G Corporación Goicha.`
       ])
 
       setCotizacionEditandoId(null)
+      localStorage.removeItem(QUOTATION_DRAFT_KEY)
+      setAvisoBorrador("")
 
       cargarCotizaciones()
     } catch (error) {
@@ -483,6 +554,14 @@ Gracias por confiar en W&G Corporación Goicha.`
             <div className="quotation-products-header">
               <h2>Productos</h2>
               <div className="quotation-product-actions">
+  <button
+    type="button"
+    className="quotation-clear-draft"
+    onClick={limpiarBorrador}
+  >
+    Limpiar borrador
+  </button>
+
   <button type="button" onClick={() => setImportOpen(true)}>
     Importar lista
   </button>
@@ -492,6 +571,12 @@ Gracias por confiar en W&G Corporación Goicha.`
   </button>
 </div>
             </div>
+
+            {avisoBorrador && (
+              <div className="quotation-draft-notice" role="status">
+                {avisoBorrador}
+              </div>
+            )}
 
             <div className="quotation-items">
               {items.map((item, index) => (

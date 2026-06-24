@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { useReveal } from "../hooks/useReveal"
 import { obtenerProductos } from "../services/productoService"
@@ -26,6 +26,8 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
   const [carritoCargado, setCarritoCargado] = useState(false)
   const [pedidoExitoso, setPedidoExitoso] = useState(null)
   const [whatsappPedidoUrl, setWhatsappPedidoUrl] = useState("")
+  const [ultimoAgregadoKey, setUltimoAgregadoKey] = useState(null)
+  const feedbackAgregadoTimeout = useRef(null)
 
   const [form, setForm] = useState({
     cliente: "",
@@ -103,12 +105,20 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       .catch((err) => console.error("Error cargando categorías:", err))
   }, [])
 
+  /* Product modal UX V1 */
+  const obtenerKeyCarrito = (productoId, varianteId = null) =>
+    varianteId ? `${productoId}-${varianteId}` : `${productoId}`
+
+  const varianteEstaEnCarrito = (productoId, varianteId) =>
+    carrito.some(
+      (item) => item.keyCarrito === obtenerKeyCarrito(productoId, varianteId)
+    )
+
   const agregarAlCarrito = (producto) => {
+    const keyCarrito = obtenerKeyCarrito(producto.id, producto.varianteId)
     const productoParaCarrito = {
       id: producto.id,
-      keyCarrito: producto.varianteId
-        ? `${producto.id}-${producto.varianteId}`
-        : `${producto.id}`,
+      keyCarrito,
       nombre: producto.nombre,
       imagen: producto.imagen,
       precio: producto.precio || 0,
@@ -119,6 +129,12 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
 
     setCartAnimado(true)
     setTimeout(() => setCartAnimado(false), 600)
+    setUltimoAgregadoKey(keyCarrito)
+    clearTimeout(feedbackAgregadoTimeout.current)
+    feedbackAgregadoTimeout.current = setTimeout(
+      () => setUltimoAgregadoKey(null),
+      1400
+    )
 
     setCarrito((prev) => {
       const existe = prev.find(
@@ -134,6 +150,11 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       return [...prev, productoParaCarrito]
     })
   }
+
+  useEffect(
+    () => () => clearTimeout(feedbackAgregadoTimeout.current),
+    []
+  )
 
   const productoEstaEnCarrito = (productoId) => {
     return carrito.some((item) => item.id === productoId)
@@ -563,11 +584,20 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
                       <button
                         key={v.id}
                         type="button"
-                        className={`variant-option ${varianteSeleccionada?.id === v.id ? "active" : ""}`}
+                        className={`variant-option ${
+                          varianteSeleccionada?.id === v.id ? "active" : ""
+                        } ${
+                          varianteEstaEnCarrito(selectedProduct.id, v.id)
+                            ? "in-cart"
+                            : ""
+                        }`}
                         onClick={() => setVarianteSeleccionada(v)}
                       >
                         <span>{v.nombre}</span>
                         <strong>S/ {Number(v.precio || 0).toFixed(2)}</strong>
+                        {varianteEstaEnCarrito(selectedProduct.id, v.id) && (
+                          <small>✓ En carrito</small>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -577,7 +607,15 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
                 {selectedProduct.descripcion || "Producto disponible para pedido."}
               </p>
               <button
-                className="product-modal__button"
+                className={`product-modal__button ${
+                  ultimoAgregadoKey ===
+                  obtenerKeyCarrito(
+                    selectedProduct.id,
+                    varianteSeleccionada?.id
+                  )
+                    ? "is-added"
+                    : ""
+                }`}
                 onClick={() => agregarAlCarrito({
                   ...selectedProduct,
                   precio: varianteSeleccionada?.precio ?? selectedProduct.precio,
@@ -585,7 +623,13 @@ ${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
                   varianteNombre: varianteSeleccionada?.nombre || null,
                 })}
               >
-                Agregar al carrito →
+                {ultimoAgregadoKey ===
+                obtenerKeyCarrito(
+                  selectedProduct.id,
+                  varianteSeleccionada?.id
+                )
+                  ? "✓ Agregado"
+                  : "Agregar al carrito →"}
               </button>
             </div>
           </div>

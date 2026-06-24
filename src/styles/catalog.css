@@ -1170,24 +1170,27 @@
   margin-top: auto;
   padding-top: 18px;
   border-top: 1px solid rgba(255,255,255,.10);
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(118px, 150px);
   align-items: center;
-  justify-content: space-between;
   gap: 14px;
 }
 
+/* Product card footer fix V1 */
 .product-footer .product-price {
+  min-width: 0;
   margin: 0;
   color: #f97316;
-  font-size: 22px;
+  font-size: clamp(17px, 1.55vw, 22px);
   font-weight: 950;
-  white-space: nowrap;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .product-footer .product-cart-button {
-  width: auto;
-  min-width: 130px;
-  max-width: 150px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   padding: 12px 14px;
   border-radius: 14px;
   font-size: 13px;
@@ -1195,8 +1198,7 @@
 }
 @media (max-width: 600px) {
   .product-footer {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
     gap: 12px;
   }
 
@@ -1208,6 +1210,12 @@
     width: 100%;
     max-width: none;
     min-width: 0;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1100px) {
+  .product-footer {
+    grid-template-columns: 1fr;
   }
 }
 .product-qty-controls {
@@ -1337,9 +1345,7 @@
 }
 
 .variant-option {
-  height: 58px;
-  min-height: 58px;
-  max-height: 58px;
+  min-height: 64px;
 
   border: 1px solid rgba(248, 113, 113, 0.35);
   background: rgba(255, 255, 255, 0.04);
@@ -1373,9 +1379,176 @@
   font-weight: 900;
 }
 
+.variant-option small {
+  color: #86efac;
+  font-size: 10px;
+  font-weight: 950;
+}
+
 .variant-option:hover,
 .variant-option.active {
   border-color: #ef4444;
   background: rgba(239, 68, 68, 0.16);
   transform: translateY(-2px);
+}
+
+.variant-option.in-cart {
+  border-color: rgba(34, 197, 94, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.12);
+}
+
+/* Product modal UX V1 */
+.product-modal__info {
+  justify-content: flex-start;
+  min-width: 0;
+  overscroll-behavior: contain;
+}
+
+.product-modal__info h2 {
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  margin-bottom: 0;
+  font-size: clamp(28px, 3.5vw, 48px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+.product-modal__badges {
+  flex: 0 0 auto;
+  margin-top: 18px;
+}
+
+.product-modal__button.is-added {
+  background: linear-gradient(135deg, #16a34a, #059669);
+  box-shadow: 0 18px 38px rgba(16, 185, 129, 0.3);
+  animation: productAddedPulse 0.55s ease;
+}
+
+@keyframes productAddedPulse {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 760px) {
+  .product-modal__info {
+    overflow-y: visible;
+  }
+
+  .product-modal__info h2 {
+    font-size: clamp(26px, 8vw, 38px);
+  }
+
+  .variant-options {
+    grid-template-columns: 1fr;
+    height: auto;
+    max-height: 230px;
+  }
+}
+
+.product-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.product-footer .product-price {
+  white-space: nowrap;
+  min-width: 92px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.product-footer .product-cart-button {
+  flex: 1;
+  min-width: 130px;
+}
+
+@media (max-width: 600px) {
+  .product-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .product-footer .product-price {
+    min-width: 0;
+    white-space: nowrap;
+  }
+
+  .product-footer .product-cart-button {
+    width: 100%;
+  }
+}
+
+.product-footer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.product-footer .product-price {
+  width: 100%;
+  white-space: nowrap;
+  line-height: 1.05;
+  font-size: clamp(20px, 2vw, 24px);
+}
+
+.product-footer .product-cart-button {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+}
+
+/* En pantallas grandes, si el precio es corto puede mantenerse ordenado */
+@media (min-width: 1200px) {
+  .product-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Ajuste imagen modal */
+.product-modal__content {
+  height: auto;
+  min-height: 620px;
+  max-height: 88vh;
+}
+
+.product-modal__image {
+  height: auto;
+  min-height: 620px;
+  padding: 26px;
+}
+
+.product-modal__image img {
+  max-width: 430px;
+  max-height: 520px;
+  object-fit: contain;
+}
+
+.product-modal__info {
+  height: auto;
+  min-height: 620px;
+  max-height: 88vh;
+  justify-content: flex-start;
+  overflow-y: auto;
+}
+
+@media (max-width: 760px) {
+  .product-modal__content {
+    min-height: auto;
+    max-height: 92vh;
+  }
+
+  .product-modal__image {
+    min-height: 300px;
+    height: 300px;
+  }
+
+  .product-modal__info {
+    min-height: auto;
+    max-height: none;
+  }
 }
