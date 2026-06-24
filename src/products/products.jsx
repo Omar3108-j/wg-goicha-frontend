@@ -165,6 +165,21 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
     return item ? item.cantidad : 0
   }
 
+  /* Product variant label in PDF V1 */
+  const obtenerNombreProductoConVariante = (item) => {
+    const nombreProducto = String(item.nombre || item.productoNombre || "").trim()
+    const nombreVariante = String(item.varianteNombre || "").trim()
+
+    if (!nombreVariante) return nombreProducto
+
+    const nombreNormalizado = nombreProducto.toLocaleLowerCase()
+    const varianteNormalizada = nombreVariante.toLocaleLowerCase()
+
+    return nombreNormalizado.includes(varianteNormalizada)
+      ? nombreProducto
+      : `${nombreProducto} - ${nombreVariante}`
+  }
+
   const aumentarCantidad = (keyCarrito) => {
     const item = carrito.find(p => p.keyCarrito === keyCarrito)
     if (item) cambiarCantidad(keyCarrito, item.cantidad + 1)
@@ -255,7 +270,7 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       ...form,
       detalles: carrito.map((item) => ({
         productoId: item.id,
-        productoNombre: item.nombre,
+        productoNombre: obtenerNombreProductoConVariante(item),
         productoImagen: item.imagen,
         cantidad: item.cantidad,
         precio: item.precio || 0,
@@ -282,8 +297,7 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
         📦 *PRODUCTOS SOLICITADOS*
 
         ${carrito.map((item, index) => `
-        ${index + 1}. ${item.nombre}
-${item.varianteNombre ? `   📏 Medida: ${item.varianteNombre}` : ""}
+        ${index + 1}. ${obtenerNombreProductoConVariante(item)}
    📦 Cantidad: ${item.cantidad}
    💰 Precio unitario: S/ ${Number(item.precio || 0).toFixed(2)}
    🧾 Subtotal: S/ ${(item.cantidad * Number(item.precio || 0)).toFixed(2)}

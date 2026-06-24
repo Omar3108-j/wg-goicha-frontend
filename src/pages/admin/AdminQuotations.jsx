@@ -498,21 +498,42 @@ if (parecePrecio && tokens.length > 1) {
   setImportOpen(false)
 }
 
+/* Persist quotation status V1 */
 const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
+  const estadoAnterior = cot.estado || "GENERADA"
+
+  setCotizaciones((prev) =>
+    prev.map((item) =>
+      item.id === cot.id ? { ...item, estado: nuevoEstado } : item
+    )
+  )
+
   try {
-    await axios.put(`${API_URL}/api/cotizaciones/${cot.id}`, {
-      ...cot,
+    const res = await axios.patch(
+      `${API_URL}/api/cotizaciones/${cot.id}/estado`,
+      {
       estado: nuevoEstado,
-    })
+      }
+    )
 
     setCotizaciones((prev) =>
       prev.map((item) =>
-        item.id === cot.id ? { ...item, estado: nuevoEstado } : item
+        item.id === cot.id
+          ? { ...item, estado: res.data?.estado || nuevoEstado }
+          : item
       )
     )
   } catch (error) {
     console.error("Error actualizando estado:", error)
+
+    setCotizaciones((prev) =>
+      prev.map((item) =>
+        item.id === cot.id ? { ...item, estado: estadoAnterior } : item
+      )
+    )
+
     alert("No se pudo actualizar el estado")
+    throw error
   }
 }
 
