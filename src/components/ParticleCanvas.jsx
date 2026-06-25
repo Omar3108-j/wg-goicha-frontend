@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react"
-import { API_URL } from "../config/api"
 
 function ParticleCanvas() {
   const canvasRef = useRef(null)

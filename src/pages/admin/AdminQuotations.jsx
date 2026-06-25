@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 /* Cotizaciones draft V1 */
 const QUOTATION_DRAFT_KEY = "wg-admin-quotation-draft"
@@ -33,6 +34,7 @@ const leerBorradorCotizacion = () => {
 }
 
 function AdminQuotations() {
+  const { showToast } = useAdminNotifications()
   /* Excel-like quotation rows V1 */
   const itemInputRefs = useRef({
     descripcion: [],
@@ -40,6 +42,8 @@ function AdminQuotations() {
     precioUnitario: [],
   })
   const pendingItemFocus = useRef(null)
+  /* Scroll to quotation form on edit V1 */
+  const quotationFormRef = useRef(null)
 
   const [borradorInicial] = useState(leerBorradorCotizacion)
   const [cotizaciones, setCotizaciones] = useState([])
@@ -84,7 +88,18 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   }
 
   useEffect(() => {
-    cargarCotizaciones()
+    const cargarCotizacionesIniciales = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/cotizaciones`)
+        setCotizaciones(Array.isArray(res.data) ? res.data : [])
+      } catch (error) {
+        console.error("Error cargando cotizaciones:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    cargarCotizacionesIniciales()
   }, [])
 
   useEffect(() => {
@@ -322,10 +337,14 @@ const editarCotizacion = (cot) => {
         ]
   )
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  })
+  showToast("Cotización cargada para edición", "info")
+
+  setTimeout(() => {
+    quotationFormRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    })
+  }, 100)
 }
 
 const duplicarCotizacion = (cot) => {
@@ -398,7 +417,7 @@ const procesarImportacion = () => {
   .filter((linea) => !linea.endsWith(":"))
 
   if (lineas.length === 0) {
-    alert("Pega al menos una línea de productos")
+    showToast("Pega al menos una línea de productos", "warning")
     return
   }
 
@@ -523,6 +542,7 @@ const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
           : item
       )
     )
+    showToast("Estado de la cotización actualizado", "success")
   } catch (error) {
     console.error("Error actualizando estado:", error)
 
@@ -532,7 +552,7 @@ const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
       )
     )
 
-    alert("No se pudo actualizar el estado")
+    showToast("No se pudo actualizar el estado", "error")
     throw error
   }
 }
@@ -566,7 +586,7 @@ Gracias por confiar en W&G Corporación Goicha.`
     const itemsValidos = items.filter((item) => item.descripcion.trim())
 
     if (itemsValidos.length === 0) {
-      alert("Agrega al menos un producto")
+      showToast("Agrega al menos un producto", "warning")
       return
     }
 
@@ -590,7 +610,7 @@ Gracias por confiar en W&G Corporación Goicha.`
   await axios.post(`${API_URL}/api/cotizaciones`, data)
 }
 
-      alert("Cotización registrada correctamente")
+      showToast("Cotización registrada correctamente", "success")
 
       setCliente({
         cliente: "",
@@ -616,7 +636,7 @@ Gracias por confiar en W&G Corporación Goicha.`
       cargarCotizaciones()
     } catch (error) {
       console.error("Error guardando cotización:", error)
-      alert("No se pudo guardar la cotización")
+      showToast("No se pudo guardar la cotización", "error")
     }
   }
 
@@ -639,7 +659,7 @@ Gracias por confiar en W&G Corporación Goicha.`
         </div>
 
         <div className="quotation-layout">
-          <div className="quotation-form-card">
+          <div className="quotation-form-card" ref={quotationFormRef}>
             <h2>Datos del cliente</h2>
 
             <div className="quotation-client-grid">

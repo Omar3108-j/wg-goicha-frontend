@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function AdminOrders() {
+  const { showToast } = useAdminNotifications()
   const [pedidos, setPedidos] = useState([])
   const [loading, setLoading] = useState(true)
   /* Order filters V1 */
@@ -26,16 +28,28 @@ function AdminOrders() {
   }
 
   useEffect(() => {
-    cargarPedidos()
+    const cargarPedidosIniciales = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/pedidos`)
+        setPedidos(res.data)
+      } catch (error) {
+        console.error("Error cargando pedidos:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    cargarPedidosIniciales()
   }, [])
 
   const cambiarEstado = async (id, estado) => {
     try {
       await axios.put(`${API_URL}/api/pedidos/${id}/estado?estado=${estado}`)
-      cargarPedidos()
+      await cargarPedidos()
+      showToast("Estado del pedido actualizado", "success")
     } catch (error) {
       console.error("Error actualizando estado:", error)
-      alert("No se pudo actualizar el estado")
+      showToast("No se pudo actualizar el estado", "error")
     }
   }
 

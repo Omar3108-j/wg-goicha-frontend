@@ -6,8 +6,6 @@ import oatey from "../assets/brands/oatey.png"
 import matusita from "../assets/brands/matusita.png"
 import cimvalve from "../assets/brands/cimvalve.png"
 import inyectoplast from "../assets/brands/inyectoplast.png"
-import { API_URL } from "../config/api"
-
 function Brands() {
   const marcas = [
     { nombre: "PAVCO", logo: pavco },

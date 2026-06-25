@@ -3,9 +3,11 @@ import { Link, useParams } from "react-router-dom"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function AdminVariantes() {
   const { id } = useParams()
+  const { showToast, requestConfirm } = useAdminNotifications()
 
   const [variantes, setVariantes] = useState([])
   const [nombre, setNombre] = useState("")
@@ -23,13 +25,26 @@ function AdminVariantes() {
   }
 
   useEffect(() => {
-  cargarProducto()
-  cargarVariantes()
-}, [id])
+    const cargarDatosIniciales = async () => {
+      try {
+        const [productoRes, variantesRes] = await Promise.all([
+          axios.get(`${API_URL}/api/productos/${id}`),
+          axios.get(`${API_URL}/api/variantes/producto/${id}`),
+        ])
+
+        setProducto(productoRes.data)
+        setVariantes(variantesRes.data)
+      } catch (error) {
+        console.error("Error cargando datos del producto:", error)
+      }
+    }
+
+    cargarDatosIniciales()
+  }, [id])
 
   const guardarVariante = async () => {
     if (!nombre.trim() || !precio) {
-      alert("Ingresa el nombre y precio de la variante")
+      showToast("Ingresa el nombre y precio de la variante", "warning")
       return
     }
 
@@ -47,10 +62,11 @@ function AdminVariantes() {
 
       setNombre("")
       setPrecio("")
-      cargarVariantes()
+      await cargarVariantes()
+      showToast("Variante guardada correctamente", "success")
     } catch (error) {
       console.error("Error guardando variante:", error)
-      alert("Error guardando variante")
+      showToast("Error guardando variante", "error")
     } finally {
       setLoading(false)
     }
@@ -66,7 +82,7 @@ function AdminVariantes() {
 
   const actualizarVariante = async (variante) => {
     if (!variante.nombre.trim() || variante.precio === "") {
-      alert("La variante debe tener nombre y precio")
+      showToast("La variante debe tener nombre y precio", "warning")
       return
     }
 
@@ -77,10 +93,11 @@ function AdminVariantes() {
         activo: variante.activo ?? true,
       })
 
-      cargarVariantes()
+      await cargarVariantes()
+      showToast("Variante actualizada correctamente", "success")
     } catch (error) {
       console.error("Error actualizando variante:", error)
-      alert("No se pudo actualizar la variante")
+      showToast("No se pudo actualizar la variante", "error")
     }
   }
 
@@ -92,34 +109,36 @@ function AdminVariantes() {
       activo: !variante.activo,
     })
 
-    cargarVariantes()
+    await cargarVariantes()
+    showToast(
+      variante.activo
+        ? "Variante desactivada correctamente"
+        : "Variante activada correctamente",
+      "success"
+    )
   } catch (error) {
     console.error("Error cambiando estado de variante:", error)
-    alert("No se pudo cambiar el estado de la variante")
+    showToast("No se pudo cambiar el estado de la variante", "error")
   }
 }
 
   const eliminarVariante = async (varianteId) => {
-    const confirmar = confirm("¿Seguro que deseas eliminar esta variante?")
+    const confirmar = await requestConfirm({
+      title: "¿Eliminar variante?",
+      message: "Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+    })
     if (!confirmar) return
 
     try {
       await axios.delete(`${API_URL}/api/variantes/${varianteId}`)
-      cargarVariantes()
+      await cargarVariantes()
+      showToast("Variante eliminada correctamente", "success")
     } catch (error) {
       console.error("Error eliminando variante:", error)
-      alert("No se pudo eliminar la variante")
+      showToast("No se pudo eliminar la variante", "error")
     }
   }
-  const cargarProducto = async () => {
-  try {
-    const res = await axios.get(`${API_URL}/api/productos/${id}`)
-    setProducto(res.data)
-  } catch (error) {
-    console.error("Error cargando producto:", error)
-  }
-}
-
   return (
     <AdminLayout>
       <div className="admin-card">

@@ -12,7 +12,6 @@ import CompanyShowcase from "../components/CompanyShowcase"
 import FeaturedProducts from "../components/FeaturedProducts"
 import Testimonials from "../components/Testimonials"
 import LocationMap from "../components/LocationMap"
-import { API_URL } from "../config/api"
 import SeoContent from "../components/SeoContent";
 
 function Home() {

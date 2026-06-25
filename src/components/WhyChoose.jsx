@@ -1,5 +1,4 @@
 import { FaTruck, FaBoxes, FaWhatsapp, FaHardHat } from "react-icons/fa"
-import { API_URL } from "../config/api"
 
 function WhyChoose() {
   const estadisticas = [

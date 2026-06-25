@@ -2,8 +2,10 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import "../../styles/admin-categories.css"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "./useAdminNotifications"
 
 function CategoriasAdmin() {
+  const { showToast, requestConfirm } = useAdminNotifications()
   const [categorias, setCategorias] = useState([])
   const [imagen, setImagen] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -21,7 +23,12 @@ function CategoriasAdmin() {
   }
 
   useEffect(() => {
-    cargarCategorias()
+    const cargarCategoriasIniciales = async () => {
+      const res = await axios.get(`${API_URL}/api/categorias`)
+      setCategorias(res.data)
+    }
+
+    cargarCategoriasIniciales()
   }, [])
 
   const handleChange = (e) => {
@@ -65,10 +72,16 @@ function CategoriasAdmin() {
       }
 
       await cargarCategorias()
+      showToast(
+        form.id
+          ? "Categoría actualizada correctamente"
+          : "Categoría creada correctamente",
+        "success"
+      )
       limpiarFormulario()
     } catch (error) {
       console.error("Error guardando categoría:", error)
-      alert("Error al guardar categoría")
+      showToast("Error al guardar categoría", "error")
     } finally {
       setLoading(false)
     }
@@ -85,14 +98,20 @@ function CategoriasAdmin() {
   }
 
   const eliminarCategoria = async (id) => {
-    if (!confirm("¿Seguro que deseas eliminar esta categoría?")) return
+    const confirmar = await requestConfirm({
+      title: "¿Eliminar categoría?",
+      message: "Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+    })
+    if (!confirmar) return
 
     try {
       await axios.delete(`${API_URL}/api/categorias/${id}`)
       await cargarCategorias()
+      showToast("Categoría eliminada correctamente", "success")
     } catch (error) {
       console.error("Error eliminando categoría:", error)
-      alert("Error al eliminar categoría")
+      showToast("Error al eliminar categoría", "error")
     }
   }
 

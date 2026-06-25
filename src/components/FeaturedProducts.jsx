@@ -8,43 +8,46 @@ function FeaturedProducts() {
   const sliderRef = useRef(null)
 
   useEffect(() => {
-    cargarDestacados()
-  }, [])
+    const obtenerPrecioMinimoVariante = async (productoId) => {
+      try {
+        const res = await fetch(
+          `${API_URL}/api/variantes/producto/${productoId}/activas`
+        )
+        const variantes = await res.json()
 
-  const cargarDestacados = async () => {
-  try {
-    const data = await obtenerProductosDestacados()
-    setProductos(data)
+        if (!variantes || variantes.length === 0) return null
 
-    const precios = {}
-
-    for (const prod of data) {
-      const precioMinimo = await obtenerPrecioMinimoVariante(prod.id)
-
-      if (precioMinimo !== null) {
-        precios[prod.id] = precioMinimo
+        const precios = variantes.map((v) => Number(v.precio || 0))
+        return Math.min(...precios)
+      } catch (error) {
+        console.error("Error obteniendo variantes del destacado:", error)
+        return null
       }
     }
 
-    setPreciosMinimos(precios)
-  } catch (error) {
-    console.error("Error cargando destacados", error)
-  }
-}
-  const obtenerPrecioMinimoVariante = async (productoId) => {
-  try {
-    const res = await fetch(`${API_URL}/api/variantes/producto/${productoId}/activas`)
-    const variantes = await res.json()
+    const cargarDestacados = async () => {
+      try {
+        const data = await obtenerProductosDestacados()
+        setProductos(data)
 
-    if (!variantes || variantes.length === 0) return null
+        const precios = {}
 
-    const precios = variantes.map((v) => Number(v.precio || 0))
-    return Math.min(...precios)
-  } catch (error) {
-    console.error("Error obteniendo variantes del destacado:", error)
-    return null
-  }
-}
+        for (const prod of data) {
+          const precioMinimo = await obtenerPrecioMinimoVariante(prod.id)
+
+          if (precioMinimo !== null) {
+            precios[prod.id] = precioMinimo
+          }
+        }
+
+        setPreciosMinimos(precios)
+      } catch (error) {
+        console.error("Error cargando destacados", error)
+      }
+    }
+
+    cargarDestacados()
+  }, [])
 
   const moverSlider = (direccion) => {
     if (!sliderRef.current) return

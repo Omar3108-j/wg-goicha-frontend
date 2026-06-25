@@ -3,8 +3,10 @@ import { Link } from "react-router-dom"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function AdminProducts() {
+  const { showToast, requestConfirm } = useAdminNotifications()
   const [productos, setProductos] = useState([])
   const [loading, setLoading] = useState(true)
   const [paginaActual, setPaginaActual] = useState(1)
@@ -27,20 +29,35 @@ function AdminProducts() {
   }
 
   useEffect(() => {
-    cargarProductos()
+    const cargarProductosIniciales = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/productos`)
+        setProductos(res.data)
+      } catch (error) {
+        console.error("Error cargando productos:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    cargarProductosIniciales()
   }, [])
 
   const eliminarProducto = async (id) => {
-    const confirmar = confirm("¿Seguro que deseas eliminar este producto?")
-
+    const confirmar = await requestConfirm({
+      title: "¿Eliminar producto?",
+      message: "Esta acción no se puede deshacer.",
+      confirmLabel: "Eliminar",
+    })
     if (!confirmar) return
 
     try {
       await axios.delete(`${API_URL}/api/productos/${id}`)
-      cargarProductos()
+      await cargarProductos()
+      showToast("Producto eliminado correctamente", "success")
     } catch (error) {
       console.error("Error eliminando producto:", error)
-      alert("No se pudo eliminar el producto")
+      showToast("No se pudo eliminar el producto", "error")
     }
   }
 
@@ -51,10 +68,16 @@ function AdminProducts() {
   destacado: !producto.destacado,
 })
 
-    cargarProductos()
+    await cargarProductos()
+    showToast(
+      producto.destacado
+        ? "Producto retirado de destacados"
+        : "Producto marcado como destacado",
+      "success"
+    )
   } catch (error) {
     console.error("Error actualizando destacado:", error)
-    alert("No se pudo actualizar el producto destacado")
+    showToast("No se pudo actualizar el producto destacado", "error")
   }
 }
 const cambiarEstadoProducto = async (producto) => {
@@ -64,10 +87,16 @@ const cambiarEstadoProducto = async (producto) => {
       activo: producto.activo === false ? true : false,
     })
 
-    cargarProductos()
+    await cargarProductos()
+    showToast(
+      producto.activo === false
+        ? "Producto activado correctamente"
+        : "Producto desactivado correctamente",
+      "success"
+    )
   } catch (error) {
     console.error("Error cambiando estado del producto:", error)
-    alert("No se pudo cambiar el estado del producto")
+    showToast("No se pudo cambiar el estado del producto", "error")
   }
 }
 

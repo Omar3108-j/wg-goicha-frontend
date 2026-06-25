@@ -1,4 +1,3 @@
-import { API_URL } from "../config/api"
 function Testimonials() {
   const testimonios = [
     {

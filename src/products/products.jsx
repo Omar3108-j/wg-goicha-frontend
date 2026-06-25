@@ -87,7 +87,9 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
 
   useEffect(() => {
     const carritoGuardado = localStorage.getItem("wg_carrito")
+    // La hidratación inicial desde localStorage es intencional y ocurre una sola vez.
     if (carritoGuardado) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCarrito(JSON.parse(carritoGuardado))
     }
     setCarritoCargado(true)
@@ -232,15 +234,6 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       quitarDelCarrito(keyCarrito)
     } else {
       cambiarCantidad(keyCarrito, item.cantidad - 1)
-    }
-  }
-
-  const toggleProductoCarrito = (producto) => {
-    if (productoEstaEnCarrito(producto.id)) {
-      const item = carrito.find(i => i.id === producto.id)
-      if (item) quitarDelCarrito(item.keyCarrito)
-    } else {
-      agregarAlCarrito(producto)
     }
   }
 

@@ -1,6 +1,6 @@
-import { useState } from "react"
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import AdminLayout from "./components/admin/AdminLayout"
+import { AdminNotificationsProvider } from "./components/admin/AdminNotifications"
 
 import "./App.css"
 
@@ -19,24 +19,25 @@ import AdminVariantes from "./pages/admin/AdminVariantes"
 import ProtectedRoute from "./routes/ProtectedRoute"
 
 function App() {
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("TODOS")
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
+      <AdminNotificationsProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
 
-        <Route path="/admin"element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
-        <Route path="/admin/dashboard"element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
-        <Route path="/admin/productos"element={<ProtectedRoute><AdminProducts /></ProtectedRoute>}/>
-        <Route path="/admin/categorias"element={<ProtectedRoute><AdminLayout><CategoriasAdmin /></AdminLayout></ProtectedRoute>}/>
-        <Route path="/admin/productos/nuevo"element={<ProtectedRoute><AddProduct /></ProtectedRoute>}/>
-        <Route path="/admin/productos/editar/:id"element={<ProtectedRoute><EditProduct /></ProtectedRoute>}/>
-        <Route path="/admin/pedidos"element={<ProtectedRoute><AdminOrders /></ProtectedRoute>}/>
-        <Route path="/admin/cotizaciones"element={<ProtectedRoute><AdminQuotations/></ProtectedRoute>}/>
-        <Route path="/admin/productos/:id/variantes" element={<ProtectedRoute><AdminVariantes /></ProtectedRoute>}/>
-      </Routes>
+          <Route path="/admin"element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
+          <Route path="/admin/dashboard"element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}/>
+          <Route path="/admin/productos"element={<ProtectedRoute><AdminProducts /></ProtectedRoute>}/>
+          <Route path="/admin/categorias"element={<ProtectedRoute><AdminLayout><CategoriasAdmin /></AdminLayout></ProtectedRoute>}/>
+          <Route path="/admin/productos/nuevo"element={<ProtectedRoute><AddProduct /></ProtectedRoute>}/>
+          <Route path="/admin/productos/editar/:id"element={<ProtectedRoute><EditProduct /></ProtectedRoute>}/>
+          <Route path="/admin/pedidos"element={<ProtectedRoute><AdminOrders /></ProtectedRoute>}/>
+          <Route path="/admin/cotizaciones"element={<ProtectedRoute><AdminQuotations/></ProtectedRoute>}/>
+          <Route path="/admin/productos/:id/variantes" element={<ProtectedRoute><AdminVariantes /></ProtectedRoute>}/>
+        </Routes>
+      </AdminNotificationsProvider>
     </BrowserRouter>
   )
 }

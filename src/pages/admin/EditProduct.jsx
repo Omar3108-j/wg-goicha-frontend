@@ -2,10 +2,12 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { API_URL } from "../../config/api"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function EditProduct() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { showToast } = useAdminNotifications()
 
   const [form, setForm] = useState({
     nombre: "",
@@ -79,11 +81,11 @@ function EditProduct() {
         categoria: { id: form.categoriaId },
       })
 
-      alert("Producto actualizado correctamente")
+      showToast("Producto actualizado correctamente", "success")
       navigate("/admin/productos")
     } catch (error) {
       console.error("Error actualizando producto:", error)
-      alert("Error al actualizar producto")
+      showToast("Error al actualizar producto", "error")
     } finally {
       setLoading(false)
     }
