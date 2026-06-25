@@ -28,6 +28,7 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
   const [whatsappPedidoUrl, setWhatsappPedidoUrl] = useState("")
   const [ultimoAgregadoKey, setUltimoAgregadoKey] = useState(null)
   const feedbackAgregadoTimeout = useRef(null)
+  const productModalScrollPosition = useRef(0)
 
   const [form, setForm] = useState({
     cliente: "",
@@ -97,6 +98,45 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       localStorage.setItem("wg_carrito", JSON.stringify(carrito))
     }
   }, [carrito, carritoCargado])
+
+  /* Lock body scroll while product modal is open V2 */
+  /* Restore product catalog scroll position V2 */
+  useEffect(() => {
+    if (!selectedProduct) return undefined
+
+    const scrollY = window.scrollY
+    const body = document.body
+    const html = document.documentElement
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    }
+    const previousHtmlOverflow = html.style.overflow
+
+    productModalScrollPosition.current = scrollY
+    html.style.overflow = "hidden"
+    body.style.position = "fixed"
+    body.style.top = `-${scrollY}px`
+    body.style.left = "0"
+    body.style.right = "0"
+    body.style.width = "100%"
+    body.style.overflow = "hidden"
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow
+      body.style.position = previousBodyStyles.position
+      body.style.top = previousBodyStyles.top
+      body.style.left = previousBodyStyles.left
+      body.style.right = previousBodyStyles.right
+      body.style.width = previousBodyStyles.width
+      body.style.overflow = previousBodyStyles.overflow
+      window.scrollTo(0, productModalScrollPosition.current)
+    }
+  }, [selectedProduct])
 
   useEffect(() => {
     axios
@@ -597,6 +637,14 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
               }
             </div>
             <div className="product-modal__info">
+              {/* Mobile modal UX improvements */}
+              <button
+                type="button"
+                className="product-modal__back"
+                onClick={() => setSelectedProduct(null)}
+              >
+                ← Volver a productos
+              </button>
               <p className="product-modal__label">Detalle del producto</p>
               <h2>{selectedProduct.nombre}</h2>
               <div className="product-modal__badges">

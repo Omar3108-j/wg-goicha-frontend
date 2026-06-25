@@ -220,9 +220,6 @@
   font-size: 13px;
   font-weight: 900;
 }
-.quotation-pdf-button:hover {
-  transform: translateY(-1px);
-}
 .quotation-whatsapp-button {
   margin-top: 6px;
   padding: 10px 14px;
@@ -234,9 +231,6 @@
   font-weight: 900;
   text-align: center;
   cursor: pointer;
-}
-.quotation-whatsapp-button:hover {
-  transform: translateY(-1px);
 }
 .quotation-edit-button {
   margin-top: 6px;
@@ -250,7 +244,6 @@
   cursor: pointer;
 }
 .quotation-edit-button:hover {
-  transform: translateY(-1px);
   background: #e0e7ff;
 }
 .quotation-filter {
@@ -509,7 +502,6 @@
   transition: all 0.18s ease;
 }
 .quotation-duplicate-button:hover {
-  transform: translateY(-1px);
   background: #dbeafe;
 }
 .quotation-list-main {
