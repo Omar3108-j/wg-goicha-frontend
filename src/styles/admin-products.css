@@ -126,6 +126,59 @@
   font-weight: 800;
 }
 
+/* Product admin filters V1 */
+.admin-product-filters {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) repeat(3, minmax(160px, auto));
+  gap: 12px;
+  margin: 0 0 24px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.52);
+}
+
+.admin-product-filters input,
+.admin-product-filters select {
+  width: 100%;
+  min-width: 0;
+  height: 50px;
+  padding: 0 15px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.88);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  outline: none;
+}
+
+.admin-product-filters input::placeholder {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.admin-product-filters select option {
+  background: #0f172a;
+  color: #fff;
+}
+
+.admin-product-filters input:focus,
+.admin-product-filters select:focus {
+  border-color: rgba(239, 68, 68, 0.65);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+}
+
+.admin-product-filter-empty {
+  margin: 0;
+  padding: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.2);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.45);
+  color: #94a3b8;
+  text-align: center;
+  font-weight: 800;
+}
+
 /* ============================================================
    PAGINATION
    ============================================================ */
@@ -774,6 +827,10 @@
   .admin-product-stats {
     grid-template-columns: 1fr 1fr;
   }
+
+  .admin-product-filters {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -859,6 +916,11 @@
     font-size: 22px;
   }
 
+  .admin-product-filters {
+    padding: 13px;
+    gap: 10px;
+  }
+
   .admin-variants-header {
     flex-direction: column;
   }
@@ -883,6 +945,10 @@
 
 @media (max-width: 480px) {
   .admin-product-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-product-filters {
     grid-template-columns: 1fr;
   }
 

@@ -9,6 +9,11 @@ function AdminProducts() {
   const [loading, setLoading] = useState(true)
   const [paginaActual, setPaginaActual] = useState(1)
   const [productosPorPagina, setProductosPorPagina] = useState(10)
+  /* Product admin filters V1 */
+  const [busquedaProducto, setBusquedaProducto] = useState("")
+  const [filtroEstadoProducto, setFiltroEstadoProducto] = useState("TODOS")
+  const [filtroCategoriaProducto, setFiltroCategoriaProducto] = useState("TODAS")
+  const [filtroDestacadoProducto, setFiltroDestacadoProducto] = useState("TODOS")
 
   const cargarProductos = async () => {
     try {
@@ -70,10 +75,52 @@ const totalProductos = productos.length
 const productosActivos = productos.filter((p) => p.activo !== false).length
 const productosInactivos = productos.filter((p) => p.activo === false).length
 
-const indiceUltimo = paginaActual * productosPorPagina
+const obtenerCategoriaProducto = (producto) =>
+  producto.categoria?.nombre ||
+  (typeof producto.categoria === "string" ? producto.categoria : "")
+
+const categoriasProductos = [
+  ...new Set(
+    productos
+      .map(obtenerCategoriaProducto)
+      .filter(Boolean)
+  ),
+].sort((a, b) => String(a).localeCompare(String(b)))
+
+const productosFiltrados = productos.filter((producto) => {
+  const categoria = obtenerCategoriaProducto(producto)
+  const texto =
+    `${producto.nombre || ""} ${producto.marca || ""} ${producto.tipo || ""} ${categoria}`.toLowerCase()
+  const coincideBusqueda = texto.includes(busquedaProducto.toLowerCase())
+  const coincideEstado =
+    filtroEstadoProducto === "TODOS" ||
+    (filtroEstadoProducto === "ACTIVOS" && producto.activo !== false) ||
+    (filtroEstadoProducto === "INACTIVOS" && producto.activo === false)
+  const coincideCategoria =
+    filtroCategoriaProducto === "TODAS" ||
+    String(categoria) === filtroCategoriaProducto
+  const coincideDestacado =
+    filtroDestacadoProducto === "TODOS" ||
+    (filtroDestacadoProducto === "DESTACADOS" && producto.destacado === true) ||
+    (filtroDestacadoProducto === "NO_DESTACADOS" && producto.destacado !== true)
+
+  return (
+    coincideBusqueda &&
+    coincideEstado &&
+    coincideCategoria &&
+    coincideDestacado
+  )
+})
+
+/* Product admin filtered pagination V1 */
+const totalPaginas = Math.max(
+  1,
+  Math.ceil(productosFiltrados.length / productosPorPagina)
+)
+const paginaActualSegura = Math.min(paginaActual, totalPaginas)
+const indiceUltimo = paginaActualSegura * productosPorPagina
 const indicePrimero = indiceUltimo - productosPorPagina
-const productosPaginados = productos.slice(indicePrimero, indiceUltimo)
-const totalPaginas = Math.ceil(productos.length / productosPorPagina)
+const productosPaginados = productosFiltrados.slice(indicePrimero, indiceUltimo)
 
   return (
   <AdminLayout>
@@ -119,10 +166,67 @@ const totalPaginas = Math.ceil(productos.length / productosPorPagina)
   </select>
 </div>
 
+        <div className="admin-product-filters">
+          <input
+            type="search"
+            placeholder="Buscar por nombre, marca, tipo o categoría..."
+            value={busquedaProducto}
+            onChange={(e) => {
+              setBusquedaProducto(e.target.value)
+              setPaginaActual(1)
+            }}
+          />
+
+          <select
+            value={filtroEstadoProducto}
+            onChange={(e) => {
+              setFiltroEstadoProducto(e.target.value)
+              setPaginaActual(1)
+            }}
+          >
+            <option value="TODOS">Todos los estados</option>
+            <option value="ACTIVOS">Activos</option>
+            <option value="INACTIVOS">Inactivos</option>
+          </select>
+
+          <select
+            value={filtroCategoriaProducto}
+            onChange={(e) => {
+              setFiltroCategoriaProducto(e.target.value)
+              setPaginaActual(1)
+            }}
+          >
+            <option value="TODAS">Todas las categorías</option>
+            {categoriasProductos.map((categoria) => (
+              <option key={categoria} value={categoria}>
+                {categoria}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filtroDestacadoProducto}
+            onChange={(e) => {
+              setFiltroDestacadoProducto(e.target.value)
+              setPaginaActual(1)
+            }}
+          >
+            <option value="TODOS">Todos</option>
+            <option value="DESTACADOS">Destacados</option>
+            <option value="NO_DESTACADOS">No destacados</option>
+          </select>
+        </div>
+
         {loading && <p className="admin-empty">Cargando productos...</p>}
 
         {!loading && productos.length === 0 && (
           <p className="admin-empty">No hay productos registrados.</p>
+        )}
+
+        {!loading && productos.length > 0 && productosFiltrados.length === 0 && (
+          <p className="admin-product-filter-empty">
+            No hay productos que coincidan con los filtros.
+          </p>
         )}
 
         <div className="admin-product-list">
@@ -195,22 +299,22 @@ const totalPaginas = Math.ceil(productos.length / productosPorPagina)
           ))}
         </div>
 
-        {totalPaginas > 1 && (
+        {productosFiltrados.length > 0 && totalPaginas > 1 && (
   <div className="admin-pagination">
     <button
-      disabled={paginaActual === 1}
-      onClick={() => setPaginaActual((prev) => prev - 1)}
+      disabled={paginaActualSegura === 1}
+      onClick={() => setPaginaActual(paginaActualSegura - 1)}
     >
       ← Anterior
     </button>
 
     <span>
-      Página {paginaActual} de {totalPaginas}
+      Página {paginaActualSegura} de {totalPaginas}
     </span>
 
     <button
-      disabled={paginaActual === totalPaginas}
-      onClick={() => setPaginaActual((prev) => prev + 1)}
+      disabled={paginaActualSegura === totalPaginas}
+      onClick={() => setPaginaActual(paginaActualSegura + 1)}
     >
       Siguiente →
     </button>
