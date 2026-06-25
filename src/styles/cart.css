@@ -490,6 +490,29 @@
   font-weight: 900;
 }
 
+/* Public header visibility fix V1 */
+.cart-floating-button {
+  z-index: 2300;
+}
+
+@media (max-width: 980px) {
+  .cart-floating-button {
+    top: 9px !important;
+    right: 68px !important;
+    width: 44px !important;
+    height: 44px !important;
+    z-index: 2300 !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .cart-floating-button {
+    right: 62px !important;
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
 .cart-price-unit small {
   color: #64748b;
   font-size: 12px;
