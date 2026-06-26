@@ -79,52 +79,73 @@
 
 /* Buscador premium */
 .catalog-search-box {
+  position: relative;
   width: 100%;
-  padding: 12px;
-  border-radius: 22px;
-  background: rgba(255,255,255,.03);
-  border: 1px solid rgba(255,255,255,.12);
+  min-height: 68px;
+  padding: 7px 9px;
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.025));
+  border: 1px solid rgba(255, 255, 255, 0.11);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   box-shadow:
-    0 0 0 1px rgba(255,255,255,.04),
-    0 10px 30px rgba(0,0,0,.35);
-  transition: all .25s ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.045),
+    0 14px 34px rgba(0, 0, 0, 0.3);
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
 .catalog-search-box:focus-within {
-  border-color: rgba(239,68,68,.45);
+  border-color: rgba(239, 68, 68, 0.55);
+  background:
+    linear-gradient(135deg, rgba(239, 68, 68, 0.075), rgba(255, 255, 255, 0.025));
   box-shadow:
-    0 0 0 3px rgba(239,68,68,.10),
-    0 10px 35px rgba(239,68,68,.12);
+    0 0 0 4px rgba(239, 68, 68, 0.09),
+    0 18px 42px rgba(0, 0, 0, 0.38);
 }
 
 .catalog-search-icon {
-  width: 44px;
-  min-width: 44px;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
   display: grid;
   place-items: center;
-  color: rgba(255,255,255,.48);
-  font-size: 32px;
-  line-height: 1;
+  color: rgba(255, 255, 255, 0.55);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  transition:
+    color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.catalog-search-box:focus-within .catalog-search-icon {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.11);
+  transform: scale(1.03);
 }
 
 .catalog-search-box input {
   width: 100%;
-  height: 56px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.04);
+  height: 52px;
+  border: 0;
+  background: transparent;
   color: #fff;
-  padding: 0 20px;
+  padding: 0 14px 0 4px;
   font-size: 16px;
-  font-weight: 850;
+  font-weight: 800;
+  letter-spacing: 0.01em;
   outline: none;
 }
 
 .catalog-search-box input::placeholder {
-  color: rgba(255,255,255,.45);
+  color: rgba(255, 255, 255, 0.42);
+  font-weight: 750;
 }
 @media (max-width: 768px) {
 
@@ -685,6 +706,87 @@
 /* RESPONSIVE */
 
 @media (max-width: 760px) {
+  .catalog-section {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .catalog-container,
+  .catalog-stats,
+  .catalog-tools,
+  .catalog-search-box,
+  .catalog-filter-pills,
+  .catalog-grid,
+  .catalog-cta,
+  .catalog-empty-results {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .catalog-search-box input {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+  }
+
+  .catalog-search-box {
+    min-height: 64px;
+    padding: 7px;
+    border-radius: 18px;
+  }
+
+  .catalog-search-icon {
+    width: 46px;
+    height: 46px;
+    flex-basis: 46px;
+    border-radius: 13px;
+  }
+
+  .catalog-search-box input {
+    height: 48px;
+    padding-right: 10px;
+    font-size: 15px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .product-card,
+  .product-skeleton-card,
+  .product-card__body,
+  .product-footer {
+    min-width: 0;
+  }
+
+  .product-meta {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .product-meta span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .product-qty-controls {
+    width: 100%;
+    min-width: 0;
+    gap: 6px;
+  }
+
+  .product-qty-controls button {
+    width: 34px;
+    height: 38px;
+    flex: 0 0 34px;
+  }
+
+  .product-qty-input {
+    width: 32px;
+    flex: 0 0 32px;
+  }
+
   .product-modal__content {
     grid-template-columns: 1fr;
     height: 92vh;

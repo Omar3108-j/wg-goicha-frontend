@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { obtenerProductosDestacados } from "../services/productoService"
-import { API_URL } from "../config/api"
+import { obtenerProductosCatalogo } from "../services/productoService"
 
 function FeaturedProducts() {
   const [productos, setProductos] = useState([])
@@ -8,39 +7,22 @@ function FeaturedProducts() {
   const sliderRef = useRef(null)
 
   useEffect(() => {
-    const obtenerPrecioMinimoVariante = async (productoId) => {
-      try {
-        const res = await fetch(
-          `${API_URL}/api/variantes/producto/${productoId}/activas`
-        )
-        const variantes = await res.json()
-
-        if (!variantes || variantes.length === 0) return null
-
-        const precios = variantes.map((v) => Number(v.precio || 0))
-        return Math.min(...precios)
-      } catch (error) {
-        console.error("Error obteniendo variantes del destacado:", error)
-        return null
-      }
-    }
-
     const cargarDestacados = async () => {
       try {
-        const data = await obtenerProductosDestacados()
-        setProductos(data)
+        const catalogo = await obtenerProductosCatalogo()
+        const destacados = catalogo.filter((producto) => producto.destacado)
 
-        const precios = {}
-
-        for (const prod of data) {
-          const precioMinimo = await obtenerPrecioMinimoVariante(prod.id)
-
-          if (precioMinimo !== null) {
-            precios[prod.id] = precioMinimo
-          }
-        }
-
-        setPreciosMinimos(precios)
+        setProductos(destacados)
+        setPreciosMinimos(
+          Object.fromEntries(
+            destacados
+              .filter((producto) => producto.tieneVariantesActivas)
+              .map((producto) => [
+                producto.id,
+                Number(producto.precioMinimo || 0),
+              ])
+          )
+        )
       } catch (error) {
         console.error("Error cargando destacados", error)
       }

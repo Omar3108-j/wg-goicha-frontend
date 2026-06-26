@@ -1,11 +1,16 @@
 import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { useReveal } from "../hooks/useReveal"
-import { obtenerProductos } from "../services/productoService"
-import { ShoppingCart } from "lucide-react"
+import { obtenerProductosCatalogo } from "../services/productoService"
+import { Search, ShoppingCart } from "lucide-react"
 import { API_URL } from "../config/api"
 
-function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada }) {
+function Products({
+  whatsappUrl,
+  categoriaSeleccionada,
+  setCategoriaSeleccionada,
+  categorias = [],
+}) {
   const [prodRef, prodVisible] = useReveal()
   const [productos, setProductos] = useState([])
   const [loading, setLoading] = useState(true)
@@ -20,7 +25,6 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
   const [cartAnimado, setCartAnimado] = useState(false)
   const [paginaActual, setPaginaActual] = useState(1)
   const productosPorPagina = 8
-  const [categorias, setCategorias] = useState([])
   const [productosConVariantes, setProductosConVariantes] = useState([])
   const [preciosMinimosVariantes, setPreciosMinimosVariantes] = useState({})
   const [carritoCargado, setCarritoCargado] = useState(false)
@@ -41,41 +45,24 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
     observaciones: "",
   })
 
-  // FIX: definida ANTES de usarse en el useEffect
-  const obtenerVariantesActivasProducto = async (productoId) => {
-    try {
-      const res = await axios.get(
-        `${API_URL}/api/variantes/producto/${productoId}/activas`
-      )
-      return res.data || []
-    } catch (error) {
-      console.error("Error verificando variantes:", error)
-      return []
-    }
-  }
-
   useEffect(() => {
     const cargarProductos = async () => {
       try {
-        const data = await obtenerProductos()
+        const data = await obtenerProductosCatalogo()
         setProductos(data)
 
-        const idsConVariantesActivas = []
-        const preciosMinimos = {}
-
-        for (const prod of data) {
-          // FIX: solo necesitamos variantes activas para ambas lógicas
-          const variantesActivas = await obtenerVariantesActivasProducto(prod.id)
-
-          if (variantesActivas.length > 0) {
-            idsConVariantesActivas.push(prod.id)
-            const precios = variantesActivas.map((v) => Number(v.precio || 0))
-            preciosMinimos[prod.id] = Math.min(...precios)
-          }
-        }
-
-        setProductosConVariantes(idsConVariantesActivas)
-        setPreciosMinimosVariantes(preciosMinimos)
+        setProductosConVariantes(
+          data
+            .filter((prod) => prod.tieneVariantesActivas)
+            .map((prod) => prod.id)
+        )
+        setPreciosMinimosVariantes(
+          Object.fromEntries(
+            data
+              .filter((prod) => prod.tieneVariantesActivas)
+              .map((prod) => [prod.id, Number(prod.precioMinimo || 0)])
+          )
+        )
       } catch (error) {
         console.error("Error cargando productos:", error)
       } finally {
@@ -139,13 +126,6 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
       window.scrollTo(0, productModalScrollPosition.current)
     }
   }, [selectedProduct])
-
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/api/categorias`)
-      .then((res) => setCategorias(res.data))
-      .catch((err) => console.error("Error cargando categorías:", err))
-  }, [])
 
   /* Product modal UX V1 */
   const obtenerKeyCarrito = (productoId, varianteId = null) =>
@@ -269,22 +249,12 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const cargarVariantes = async (productoId) => {
-    try {
-      const res = await axios.get(
-        `${API_URL}/api/variantes/producto/${productoId}/activas`
-      )
-      setVariantesProducto(res.data)
-      if (res.data.length > 0) {
-        setVarianteSeleccionada(res.data[0])
-      } else {
-        setVarianteSeleccionada(null)
-      }
-    } catch (error) {
-      console.error(error)
-      setVariantesProducto([])
-      setVarianteSeleccionada(null)
-    }
+  const cargarVariantes = (productoId) => {
+    const producto = productos.find((item) => item.id === productoId)
+    const variantes = producto?.variantesActivas || []
+
+    setVariantesProducto(variantes)
+    setVarianteSeleccionada(variantes[0] || null)
   }
 
   const confirmarPedido = async () => {
@@ -443,7 +413,9 @@ function Products({ whatsappUrl, categoriaSeleccionada, setCategoriaSeleccionada
 
         <div className="catalog-tools">
           <div className="catalog-search-box">
-            <span className="catalog-search-icon">⌕</span>
+            <span className="catalog-search-icon" aria-hidden="true">
+              <Search size={21} strokeWidth={2.2} />
+            </span>
             <input
               type="text"
               placeholder="Buscar productos..."

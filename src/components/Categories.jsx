@@ -1,19 +1,9 @@
-import { useEffect, useRef, useState } from "react"
-import axios from "axios"
+import { useRef } from "react"
 import { useReveal } from "../hooks/useReveal"
-import { API_URL } from "../config/api"
 
-function Categories({ whatsappUrl, onSelectCategory }) {
+function Categories({ whatsappUrl, onSelectCategory, categorias = [] }) {
   const [catRef, catVisible] = useReveal()
-  const [categorias, setCategorias] = useState([])
   const sliderRef = useRef(null)
-
-  useEffect(() => {
-    axios
-      .get(`${API_URL}/api/categorias`)
-      .then((res) => setCategorias(res.data))
-      .catch((err) => console.error("Error cargando categorías:", err))
-  }, [])
 
   const moverSlider = (direccion) => {
     if (!sliderRef.current) return
