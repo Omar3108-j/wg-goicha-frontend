@@ -2,8 +2,11 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 import { useNavigate } from "react-router-dom"
 import { API_URL } from "../../config/api"
+import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
+import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function AddProduct() {
+  const { showToast } = useAdminNotifications()
   const [form, setForm] = useState({
     nombre: "",
     descripcion: "",
@@ -62,13 +65,14 @@ function AddProduct() {
         categoria: { id: form.categoriaId },
       })
 
-      alert("Producto creado correctamente")
+      showToast("Producto creado correctamente", "success")
       setForm({ nombre: "", descripcion: "", tipo: "", marca: "", precio: "", categoriaId: "" })
       setImagen(null)
       setPreview(null)
+      navigate("/admin/productos")
     } catch (error) {
       console.error("Error al crear producto:", error)
-      alert("Error al crear producto")
+      showToast("Error al crear producto", "error")
     } finally {
       setLoading(false)
     }
@@ -78,11 +82,13 @@ function AddProduct() {
     <div className="admin-page">
       <div className="admin-card admin-edit-card">
 
-        <div className="admin-header">
-          <p className="admin-badge">Panel administrador</p>
-          <h1>Agregar producto</h1>
-          <span>Registra nuevos productos para el catálogo de W&G.</span>
-        </div>
+        <AdminModuleFormHeader
+          backLabel="Volver a productos"
+          description="Registra un nuevo producto para el catálogo de W&G."
+          eyebrow="Productos"
+          onBack={() => navigate("/admin/productos")}
+          title="Nuevo producto"
+        />
 
         <form className="admin-form" onSubmit={handleSubmit}>
 

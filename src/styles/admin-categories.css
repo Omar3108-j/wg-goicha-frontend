@@ -19,6 +19,56 @@
   margin-bottom: 34px;
 }
 
+.admin-categories__header--list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.admin-categories__add {
+  flex: 0 0 auto;
+  padding: 15px 21px;
+  border: none;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: #fff;
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(239, 68, 68, 0.24);
+}
+
+.admin-categories__stat {
+  width: min(260px, 100%);
+  margin-bottom: 22px;
+  padding: 16px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.admin-categories__stat strong,
+.admin-categories__stat span {
+  display: block;
+}
+
+.admin-categories__stat strong {
+  font-size: 28px;
+  font-weight: 950;
+}
+
+.admin-categories__stat span {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-categories__form-view {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
 .admin-categories__header p {
   margin: 0 0 10px;
   color: #ff4d4d;
@@ -51,6 +101,16 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.035);
+}
+
+.admin-categories__form-view .admin-categories__form {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 0;
+  padding: 26px;
+}
+
+.admin-categories__form-view .admin-categories__upload {
+  grid-column: 1 / -1;
 }
 
 .admin-categories__form input {
@@ -271,6 +331,15 @@
     margin-bottom: 24px;
   }
 
+  .admin-categories__header--list {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-categories__add {
+    width: 100%;
+  }
+
   .admin-categories__header h1 {
     font-size: 32px;
   }
@@ -278,6 +347,15 @@
   .admin-categories__form {
     grid-template-columns: 1fr;
     padding: 15px;
+  }
+
+  .admin-categories__form-view .admin-categories__form {
+    grid-template-columns: 1fr;
+    padding: 15px;
+  }
+
+  .admin-categories__form-view .admin-categories__upload {
+    grid-column: 1;
   }
 
   .admin-categories__card {

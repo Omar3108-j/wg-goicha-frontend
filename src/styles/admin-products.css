@@ -126,6 +126,14 @@
   font-weight: 800;
 }
 
+.admin-edit-card > .admin-module-form-header {
+  color: #fff;
+}
+
+.admin-edit-card > .admin-module-form-header small {
+  color: rgba(255, 255, 255, 0.58);
+}
+
 /* Product admin filters V1 */
 .admin-product-filters {
   display: grid;

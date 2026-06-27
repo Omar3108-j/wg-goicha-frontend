@@ -22,7 +22,9 @@ function AdminLogin() {
   form.usuario.trim().toLowerCase() === "gloria" &&
   form.password === "loreto159"
 ) {
-  localStorage.setItem("adminAuth", "true")
+  /* Admin session per browser session V1 */
+  localStorage.removeItem("adminAuth")
+  sessionStorage.setItem("adminAuth", "true")
   navigate("/admin/productos")
 } else {
   alert("Credenciales incorrectas")

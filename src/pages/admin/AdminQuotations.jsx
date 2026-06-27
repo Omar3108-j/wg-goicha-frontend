@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import { API_URL } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 import {
@@ -10,6 +11,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Trash2,
   UserRound,
 } from "lucide-react"
 
@@ -69,6 +71,7 @@ function AdminQuotations() {
   const [importOpen, setImportOpen] = useState(false)
   const [textoImportacion, setTextoImportacion] = useState("")
   const [modoDuplicado, setModoDuplicado] = useState(false)
+  const [mostrarFormulario, setMostrarFormulario] = useState(false)
   /* Mobile quotation UX V2 */
   const [itemEliminando, setItemEliminando] = useState(null)
   /* Mobile quotation customer accordion V1 */
@@ -339,6 +342,7 @@ const subtotal = total / 1.18
 const igv = total - subtotal
 
 const editarCotizacion = (cot) => {
+  setMostrarFormulario(true)
   setCotizacionEditandoId(cot.id)
   setModoDuplicado(false)
 
@@ -378,6 +382,7 @@ const editarCotizacion = (cot) => {
 }
 
 const duplicarCotizacion = (cot) => {
+  setMostrarFormulario(true)
   setCotizacionEditandoId(null)
   setModoDuplicado(true)
 
@@ -413,6 +418,7 @@ const duplicarCotizacion = (cot) => {
 }
 
 const cancelarEdicion = () => {
+  setMostrarFormulario(false)
   setCotizacionEditandoId(null)
   setModoDuplicado(false)
 
@@ -432,6 +438,22 @@ const cancelarEdicion = () => {
       precioUnitario: 0,
     },
   ])
+}
+
+const nuevaCotizacion = () => {
+  setCotizacionEditandoId(null)
+  setModoDuplicado(false)
+  setMostrarFormulario(true)
+  window.scrollTo({ top: 0, behavior: "smooth" })
+}
+
+const volverAlListadoCotizaciones = () => {
+  if (cotizacionEditandoId || modoDuplicado) {
+    cancelarEdicion()
+    return
+  }
+
+  setMostrarFormulario(false)
 }
 
 const procesarImportacion = () => {
@@ -587,19 +609,34 @@ const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
   }
 }
 
+const obtenerUrlPdfCotizacion = (cotizacionId) =>
+  `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
+
 const enviarCotizacion = async (cot) => {
   try {
     await cambiarEstadoCotizacion(cot, "ENVIADA")
 
+    const codigo =
+      cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
+    const urlPdf = obtenerUrlPdfCotizacion(cot.id)
     const mensaje = `Hola ${cot.cliente || ""} 👋
 
-Adjuntamos su cotización ${
-      cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
-    }.
+Te compartimos tu cotización realizada por *W&G Corporación Goicha E.I.R.L.*
 
-Total: S/ ${Number(cot.total || 0).toFixed(2)}
+📄 *Cotización:*
+${codigo}
 
-Gracias por confiar en W&G Corporación Goicha.`
+💰 *Total:*
+S/ ${Number(cot.total || 0).toFixed(2)}
+
+Puedes descargar el PDF desde el siguiente enlace:
+
+${urlPdf}
+
+Si tienes alguna consulta o deseas modificar la cotización, estaremos encantados de ayudarte.
+
+Saludos,
+*W&G Corporación Goicha*`
 
     window.open(
       `https://wa.me/?text=${encodeURIComponent(mensaje)}`,
@@ -611,7 +648,7 @@ Gracias por confiar en W&G Corporación Goicha.`
 }
 
   const guardarCotizacion = async () => {
-    
+    const estabaEditando = Boolean(cotizacionEditandoId)
 
     const itemsValidos = items.filter((item) => item.descripcion.trim())
 
@@ -640,7 +677,12 @@ Gracias por confiar en W&G Corporación Goicha.`
   await axios.post(`${API_URL}/api/cotizaciones`, data)
 }
 
-      showToast("Cotización registrada correctamente", "success")
+      showToast(
+        estabaEditando
+          ? "Cotización actualizada correctamente"
+          : "Cotización registrada correctamente",
+        "success"
+      )
 
       setCliente({
         cliente: "",
@@ -660,6 +702,8 @@ Gracias por confiar en W&G Corporación Goicha.`
       ])
 
       setCotizacionEditandoId(null)
+      setModoDuplicado(false)
+      setMostrarFormulario(false)
       localStorage.removeItem(QUOTATION_DRAFT_KEY)
       setAvisoBorrador("")
 
@@ -673,21 +717,50 @@ Gracias por confiar en W&G Corporación Goicha.`
   return (
     <AdminLayout>
       <section className="admin-dashboard-premium">
-        <div className="admin-dashboard-hero admin-quotation-hero">
+        {!mostrarFormulario && (
+        <div className="admin-dashboard-hero admin-quotation-hero admin-module-view">
           <div>
             <p className="admin-badge">Cotizaciones</p>
-            <h1>Crear cotización</h1>
+            <h1>Gestión de cotizaciones</h1>
             <span>
-              Registra productos manualmente, calcula importes y genera una cotización profesional.
+              Consulta, filtra y administra las cotizaciones comerciales.
             </span>
           </div>
 
-          <div className="admin-dashboard-status">
-            <span>Total</span>
-            <strong>{cotizaciones.length}</strong>
+          <div className="admin-quotation-hero__actions">
+            <div className="admin-dashboard-status">
+              <span>Total</span>
+              <strong>{cotizaciones.length}</strong>
+            </div>
+            <button type="button" onClick={nuevaCotizacion}>
+              + Nueva cotización
+            </button>
           </div>
         </div>
+        )}
 
+        {mostrarFormulario && (
+        <div className="admin-module-view quotation-form-flow">
+          <AdminModuleFormHeader
+            backLabel="Volver a cotizaciones"
+            description={
+              cotizacionEditandoId
+                ? "Actualiza los datos, productos e importes de la cotización."
+                : "Completa los datos del cliente y agrega los productos a cotizar."
+            }
+            editing={Boolean(cotizacionEditandoId)}
+            eyebrow="Cotizaciones"
+            onBack={volverAlListadoCotizaciones}
+            title={
+              cotizacionEditandoId
+                ? `Editando cotización ${
+                    cotizaciones.find((cot) => cot.id === cotizacionEditandoId)
+                      ?.codigo ||
+                    `COT-${String(cotizacionEditandoId).padStart(5, "0")}`
+                  }`
+                : "Nueva cotización"
+            }
+          />
         <div className="quotation-layout">
           <div className="quotation-form-card" ref={quotationFormRef}>
             {/* Customer information UI V2 */}
@@ -836,7 +909,7 @@ Gracias por confiar en W&G Corporación Goicha.`
                 <div className="quotation-item-number">
                   <span className="quotation-item-number__desktop">{index + 1}</span>
                   <span className="quotation-item-number__mobile">
-                    Producto #{index + 1}
+                    {index + 1}
                   </span>
                 </div>
                   <div className="quotation-autocomplete">
@@ -937,11 +1010,14 @@ Gracias por confiar en W&G Corporación Goicha.`
                     type="button"
                     className="quotation-remove"
                     aria-label="Eliminar producto"
+                    title="Eliminar producto"
                     disabled={itemEliminando !== null}
                     onClick={() => quitarItemConAnimacion(index)}
                   >
                     <span className="quotation-remove__desktop">×</span>
-                    <span className="quotation-remove__mobile" aria-hidden="true">🗑</span>
+                    <span className="quotation-remove__mobile" aria-hidden="true">
+                      <Trash2 size={18} strokeWidth={2.2} />
+                    </span>
                   </button>
                 </div>
               ))}
@@ -989,8 +1065,12 @@ Gracias por confiar en W&G Corporación Goicha.`
           </div>
         </div>
         </div>
+        </div>
+        )}
 
 
+        {!mostrarFormulario && (
+        <div className="admin-module-view">
         <div className="quotation-list-card">
           <h2>Cotizaciones recientes</h2>
 
@@ -1106,7 +1186,7 @@ Gracias por confiar en W&G Corporación Goicha.`
 
         <div className="quotation-list-actions">
           <a
-            href={`${API_URL}/api/cotizaciones/${cot.id}/pdf`}
+            href={obtenerUrlPdfCotizacion(cot.id)}
             target="_blank"
             rel="noreferrer"
             className="quotation-pdf-button"
@@ -1179,6 +1259,8 @@ Gracias por confiar en W&G Corporación Goicha.`
               Siguiente
             </button>
           </div>
+        )}
+        </div>
         )}
 
         {importOpen && (

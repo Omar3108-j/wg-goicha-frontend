@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { API_URL } from "../../config/api"
+import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function EditProduct() {
@@ -95,11 +96,14 @@ function EditProduct() {
     <div className="admin-page">
       <div className="admin-card admin-edit-card">
 
-        <div className="admin-header">
-          <p className="admin-badge">Panel administrador</p>
-          <h1>Editar producto</h1>
-          <span>Actualiza la información del producto seleccionado.</span>
-        </div>
+        <AdminModuleFormHeader
+          backLabel="Volver a productos"
+          description="Actualiza la información del producto seleccionado."
+          editing
+          eyebrow="Productos"
+          onBack={() => navigate("/admin/productos")}
+          title="Editando producto"
+        />
 
         <form className="admin-form" onSubmit={handleSubmit}>
 

@@ -8,12 +8,14 @@ function AdminLayout({ children }) {
   const cerrarSidebar = () => setSidebarOpen(false)
 
   const cerrarSesion = () => {
+    /* Admin session per browser session V1 */
+    sessionStorage.removeItem("adminAuth")
     localStorage.removeItem("adminAuth")
     navigate("/admin/login")
   }
 
   return (
-    <div className="admin-shell">
+    <div className={`admin-shell${sidebarOpen ? " sidebar-open" : ""}`}>
       {/* Responsive admin drawer V1 */}
       <header className="admin-mobile-header">
         <Link

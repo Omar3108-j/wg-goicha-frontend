@@ -98,8 +98,30 @@ function Products({
   useEffect(() => {
     if (carritoCargado) {
       localStorage.setItem("wg_carrito", JSON.stringify(carrito))
+      window.dispatchEvent(
+        new CustomEvent("wg:cart-updated", {
+          detail: {
+            count: carrito.reduce(
+              (acc, item) => acc + Number(item.cantidad || 0),
+              0
+            ),
+            total: carrito.reduce(
+              (sum, item) =>
+                sum +
+                Number(item.precio || 0) * Number(item.cantidad || 0),
+              0
+            ),
+          },
+        })
+      )
     }
   }, [carrito, carritoCargado])
+
+  useEffect(() => {
+    const openCartFromHeader = () => setCartOpen(true)
+    window.addEventListener("wg:open-cart", openCartFromHeader)
+    return () => window.removeEventListener("wg:open-cart", openCartFromHeader)
+  }, [])
 
   /* Lock body scroll while product modal is open V2 */
   /* Restore product catalog scroll position V2 */
