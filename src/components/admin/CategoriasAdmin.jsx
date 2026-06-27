@@ -3,6 +3,7 @@ import axios from "axios"
 import "../../styles/admin-categories.css"
 import { API_URL } from "../../config/api"
 import AdminModuleFormHeader from "./AdminModuleFormHeader"
+import AdminPagination from "./AdminPagination"
 import { useAdminNotifications } from "./useAdminNotifications"
 
 function CategoriasAdmin() {
@@ -11,6 +12,8 @@ function CategoriasAdmin() {
   const [imagen, setImagen] = useState(null)
   const [loading, setLoading] = useState(false)
   const [mostrarFormulario, setMostrarFormulario] = useState(false)
+  const [paginaActual, setPaginaActual] = useState(1)
+  const categoriasPorPagina = 10
 
   const [form, setForm] = useState({
     id: null,
@@ -124,6 +127,17 @@ function CategoriasAdmin() {
     }
   }
 
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(categorias.length / categoriasPorPagina)
+  )
+  const paginaActualSegura = Math.min(paginaActual, totalPaginas)
+  const indiceInicial = (paginaActualSegura - 1) * categoriasPorPagina
+  const categoriasPaginadas = categorias.slice(
+    indiceInicial,
+    indiceInicial + categoriasPorPagina
+  )
+
   return (
     <div className="admin-categories">
       {mostrarFormulario ? (
@@ -209,7 +223,7 @@ function CategoriasAdmin() {
           </div>
 
           <div className="admin-categories__list">
-            {categorias.map((categoria) => (
+            {categoriasPaginadas.map((categoria) => (
               <div className="admin-categories__card" key={categoria.id}>
                 <div className="admin-categories__image">
                   {categoria.imagen ? (
@@ -243,6 +257,12 @@ function CategoriasAdmin() {
               </div>
             ))}
           </div>
+
+          <AdminPagination
+            currentPage={paginaActualSegura}
+            totalPages={totalPaginas}
+            onPageChange={setPaginaActual}
+          />
         </div>
       )}
     </div>

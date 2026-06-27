@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
+import AdminPagination from "../../components/admin/AdminPagination"
 import { API_URL } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 import {
@@ -612,36 +613,44 @@ const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
 const obtenerUrlPdfCotizacion = (cotizacionId) =>
   `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
 
+const descargarPdfCotizacion = (cotizacionId) => {
+  const enlace = document.createElement("a")
+  enlace.href = obtenerUrlPdfCotizacion(cotizacionId)
+  enlace.target = "_blank"
+  enlace.rel = "noopener noreferrer"
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+}
+
+/* Quotation WhatsApp message cleanup V1 */
 const enviarCotizacion = async (cot) => {
+  const codigo =
+    cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
+  const mensaje = [
+    `Hola ${cot.cliente || ""} \u{1F44B}`,
+    "",
+    `Te compartimos la cotización ${codigo} de W&G Corporación Goicha E.I.R.L.`,
+    "",
+    `Total: S/ ${Number(cot.total || 0).toFixed(2)}`,
+    "",
+    "Adjunto encontrarás el PDF con el detalle de productos, precios y condiciones.",
+    "",
+    "Quedamos atentos a cualquier consulta.",
+    "",
+    "Saludos,",
+    "W&G Corporación Goicha",
+  ].join("\n")
+
+  descargarPdfCotizacion(cot.id)
+  window.open(
+    `https://wa.me/?text=${encodeURIComponent(mensaje)}`,
+    "_blank",
+    "noopener,noreferrer"
+  )
+
   try {
     await cambiarEstadoCotizacion(cot, "ENVIADA")
-
-    const codigo =
-      cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
-    const urlPdf = obtenerUrlPdfCotizacion(cot.id)
-    const mensaje = `Hola ${cot.cliente || ""} 👋
-
-Te compartimos tu cotización realizada por *W&G Corporación Goicha E.I.R.L.*
-
-📄 *Cotización:*
-${codigo}
-
-💰 *Total:*
-S/ ${Number(cot.total || 0).toFixed(2)}
-
-Puedes descargar el PDF desde el siguiente enlace:
-
-${urlPdf}
-
-Si tienes alguna consulta o deseas modificar la cotización, estaremos encantados de ayudarte.
-
-Saludos,
-*W&G Corporación Goicha*`
-
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(mensaje)}`,
-      "_blank"
-    )
   } catch (error) {
     console.error("Error enviando cotización:", error)
   }
@@ -1227,38 +1236,11 @@ Saludos,
         )}
 
         {!loading && cotizacionesFiltradas.length > 0 && (
-          <div className="quotation-pagination">
-            <button
-              type="button"
-              disabled={paginaCotizacionesSegura === 1}
-              onClick={() =>
-                setPaginaCotizaciones(
-                  Math.max(1, paginaCotizacionesSegura - 1)
-                )
-              }
-            >
-              Anterior
-            </button>
-
-            <span>
-              Página {paginaCotizacionesSegura} de {totalPaginasCotizaciones}
-            </span>
-
-            <button
-              type="button"
-              disabled={paginaCotizacionesSegura === totalPaginasCotizaciones}
-              onClick={() =>
-                setPaginaCotizaciones(
-                  Math.min(
-                    totalPaginasCotizaciones,
-                    paginaCotizacionesSegura + 1
-                  )
-                )
-              }
-            >
-              Siguiente
-            </button>
-          </div>
+          <AdminPagination
+            currentPage={paginaCotizacionesSegura}
+            totalPages={totalPaginasCotizaciones}
+            onPageChange={setPaginaCotizaciones}
+          />
         )}
         </div>
         )}

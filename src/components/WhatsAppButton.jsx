@@ -10,9 +10,10 @@ function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       className="whatsapp-float"
-      aria-label="Cotizar por WhatsApp"
+      aria-label="Atención en línea por WhatsApp"
     >
-      <span className="whatsapp-label">Cotizar</span>
+      {/* Final UX polish V1 */}
+      <span className="whatsapp-label">En línea</span>
 
       <span className="whatsapp-pulse">
         <svg

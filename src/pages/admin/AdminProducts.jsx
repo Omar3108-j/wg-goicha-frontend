@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
+import AdminPagination from "../../components/admin/AdminPagination"
 import { API_URL } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
@@ -328,27 +329,13 @@ const productosPaginados = productosFiltrados.slice(indicePrimero, indiceUltimo)
           ))}
         </div>
 
-        {productosFiltrados.length > 0 && totalPaginas > 1 && (
-  <div className="admin-pagination">
-    <button
-      disabled={paginaActualSegura === 1}
-      onClick={() => setPaginaActual(paginaActualSegura - 1)}
-    >
-      ← Anterior
-    </button>
-
-    <span>
-      Página {paginaActualSegura} de {totalPaginas}
-    </span>
-
-    <button
-      disabled={paginaActualSegura === totalPaginas}
-      onClick={() => setPaginaActual(paginaActualSegura + 1)}
-    >
-      Siguiente →
-    </button>
-  </div>
-)}
+        {productosFiltrados.length > 0 && (
+          <AdminPagination
+            currentPage={paginaActualSegura}
+            totalPages={totalPaginas}
+            onPageChange={setPaginaActual}
+          />
+        )}
           </div>
   </AdminLayout>
 )
