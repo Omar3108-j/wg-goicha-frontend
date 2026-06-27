@@ -627,16 +627,14 @@ const descargarPdfCotizacion = (cotizacionId) => {
 const enviarCotizacion = async (cot) => {
   const codigo =
     cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
-  const mensaje = [
-    `Hola *${cot.cliente || ""}* \u{1F44B}`,
+  const mensaje = [ `Hola *${cot.cliente || ""}* 👋`,
+    "", `Te compartimos la cotización *${codigo}* preparada por *W&G Corporación Goicha E.I.R.L.*`,
+    "", `💰 *Total cotizado:* S/ ${Number(cot.total || 0).toFixed(2)}`, "",
+    "En el archivo adjunto encontrarás el detalle completo de la cotización.",
     "",
-    `Adjuntamos la cotización *${codigo}* realizada por *W&G Corporación Goicha E.I.R.L.*`,
-    "",
-    `Total: *S/ ${Number(cot.total || 0).toFixed(2)}*`,
-    "",
-    "El archivo PDF ya fue descargado automáticamente para que puedas adjuntarlo fácilmente a esta conversación.",
-    "",
-    "Muchas gracias por confiar en nosotros.",
+    "Quedamos atentos a cualquier consulta o a tu confirmación para coordinar tu pedido.",
+    "", "Saludos cordiales,",
+    "*Equipo W&G Corporación Goicha E.I.R.L.*"
   ].join("\n")
 
   descargarPdfCotizacion(cot.id)
