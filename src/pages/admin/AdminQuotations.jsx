@@ -3,6 +3,15 @@ import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import { API_URL } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
+import {
+  ChevronDown,
+  FileText,
+  IdCard,
+  Mail,
+  MapPin,
+  Phone,
+  UserRound,
+} from "lucide-react"
 
 /* Cotizaciones draft V1 */
 const QUOTATION_DRAFT_KEY = "wg-admin-quotation-draft"
@@ -60,6 +69,10 @@ function AdminQuotations() {
   const [importOpen, setImportOpen] = useState(false)
   const [textoImportacion, setTextoImportacion] = useState("")
   const [modoDuplicado, setModoDuplicado] = useState(false)
+  /* Mobile quotation UX V2 */
+  const [itemEliminando, setItemEliminando] = useState(null)
+  /* Mobile quotation customer accordion V1 */
+  const [customerMoreOpen, setCustomerMoreOpen] = useState(false)
   const [avisoBorrador, setAvisoBorrador] = useState(
     borradorInicial ? "Borrador recuperado" : ""
   )
@@ -299,6 +312,23 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   const quitarItem = (index) => {
     if (items.length === 1) return
     setItems(items.filter((_, i) => i !== index))
+  }
+
+  const quitarItemConAnimacion = (index) => {
+    const esMobile = window.matchMedia("(max-width: 700px)").matches
+
+    if (!esMobile) {
+      quitarItem(index)
+      return
+    }
+
+    if (items.length === 1 || itemEliminando !== null) return
+
+    setItemEliminando(index)
+    window.setTimeout(() => {
+      quitarItem(index)
+      setItemEliminando(null)
+    }, 220)
   }
 
   const total = items.reduce((acc, item) => {
@@ -660,51 +690,112 @@ Gracias por confiar en W&G Corporación Goicha.`
 
         <div className="quotation-layout">
           <div className="quotation-form-card" ref={quotationFormRef}>
-            <h2>Datos del cliente</h2>
-
-            <div className="quotation-client-grid">
-              <input
-                name="cliente"
-                placeholder="Cliente / Razón social"
-                value={cliente.cliente}
-                onChange={handleClienteChange}
-              />
-
-              <input
-                name="ruc"
-                placeholder="RUC / DNI"
-                value={cliente.ruc}
-                onChange={handleClienteChange}
-              />
-
-              <input
-                name="telefono"
-                placeholder="Teléfono"
-                value={cliente.telefono}
-                onChange={handleClienteChange}
-              />
-
-              <input
-                name="correo"
-                placeholder="Correo"
-                value={cliente.correo}
-                onChange={handleClienteChange}
-              />
+            {/* Customer information UI V2 */}
+            <div className="quotation-customer-header">
+              <span>Datos del cliente</span>
+              <h2>Información comercial</h2>
+              <p>Complete la información del cliente para generar la cotización.</p>
             </div>
 
-            <input
-              name="direccion"
-              placeholder="Dirección"
-              value={cliente.direccion}
-              onChange={handleClienteChange}
-            />
+            <div className="quotation-client-grid">
+              <label className="quotation-customer-field quotation-customer-field--full">
+                <span>Cliente *</span>
+                <span className="quotation-customer-control">
+                  <UserRound size={18} aria-hidden="true" />
+                  <input
+                    name="cliente"
+                    placeholder="Ingrese el nombre del cliente"
+                    value={cliente.cliente}
+                    onChange={handleClienteChange}
+                  />
+                </span>
+              </label>
 
-            <textarea
-              name="observaciones"
-              placeholder="Observaciones de la cotización"
-              value={cliente.observaciones}
-              onChange={handleClienteChange}
-            />
+              <label className="quotation-customer-field">
+                <span>Teléfono</span>
+                <span className="quotation-customer-control">
+                  <Phone size={18} aria-hidden="true" />
+                  <input
+                    name="telefono"
+                    placeholder="Teléfono o WhatsApp"
+                    value={cliente.telefono}
+                    onChange={handleClienteChange}
+                  />
+                </span>
+              </label>
+
+              <button
+                type="button"
+                className={`quotation-customer-more-toggle ${
+                  customerMoreOpen ? "is-open" : ""
+                }`}
+                aria-expanded={customerMoreOpen}
+                aria-controls="quotation-customer-optional-fields"
+                onClick={() => setCustomerMoreOpen((open) => !open)}
+              >
+                Más información (opcional)
+                <ChevronDown size={18} aria-hidden="true" />
+              </button>
+
+              <div
+                id="quotation-customer-optional-fields"
+                className={`quotation-customer-optional-fields ${
+                  customerMoreOpen ? "is-open" : ""
+                }`}
+              >
+                <label className="quotation-customer-field">
+                  <span>RUC / DNI</span>
+                  <span className="quotation-customer-control">
+                    <IdCard size={18} aria-hidden="true" />
+                    <input
+                      name="ruc"
+                      placeholder="Ingrese RUC o DNI"
+                      value={cliente.ruc}
+                      onChange={handleClienteChange}
+                    />
+                  </span>
+                </label>
+
+                <label className="quotation-customer-field quotation-customer-field--full">
+                  <span>Correo</span>
+                  <span className="quotation-customer-control">
+                    <Mail size={18} aria-hidden="true" />
+                    <input
+                      name="correo"
+                      placeholder="Correo electrónico (opcional)"
+                      value={cliente.correo}
+                      onChange={handleClienteChange}
+                    />
+                  </span>
+                </label>
+
+                <label className="quotation-customer-field quotation-customer-field--full">
+                  <span>Dirección</span>
+                  <span className="quotation-customer-control">
+                    <MapPin size={18} aria-hidden="true" />
+                    <input
+                      name="direccion"
+                      placeholder="Dirección del cliente (opcional)"
+                      value={cliente.direccion}
+                      onChange={handleClienteChange}
+                    />
+                  </span>
+                </label>
+
+                <label className="quotation-customer-field quotation-customer-field--full">
+                  <span>Observaciones</span>
+                  <span className="quotation-customer-control quotation-customer-control--textarea">
+                    <FileText size={18} aria-hidden="true" />
+                    <textarea
+                      name="observaciones"
+                      placeholder="Observaciones de la cotización"
+                      value={cliente.observaciones}
+                      onChange={handleClienteChange}
+                    />
+                  </span>
+                </label>
+              </div>
+            </div>
 
             <div className="quotation-products-header">
               <h2>Productos</h2>
@@ -736,9 +827,17 @@ Gracias por confiar en W&G Corporación Goicha.`
             <div className="quotation-items">
               {items.map((item, index) => (
 
-                <div key={index} className="quotation-item-row">
+                <div
+                  key={index}
+                  className={`quotation-item-row ${
+                    itemEliminando === index ? "is-removing" : ""
+                  }`}
+                >
                 <div className="quotation-item-number">
-                  {index + 1}
+                  <span className="quotation-item-number__desktop">{index + 1}</span>
+                  <span className="quotation-item-number__mobile">
+                    Producto #{index + 1}
+                  </span>
                 </div>
                   <div className="quotation-autocomplete">
   <input
@@ -781,55 +880,68 @@ Gracias por confiar en W&G Corporación Goicha.`
   )}
 </div>
 
-                  <input
-                    ref={(element) => {
-                      itemInputRefs.current.cantidad[index] = element
-                    }}
-                    type="number"
-                    placeholder="Cant."
-                    value={item.cantidad}
-                    min="0"
-                    step="0.01"
-                    onKeyDown={(event) =>
-                      handleItemNavigation(event, index, "cantidad")
-                    }
-                    onWheel={(event) => event.currentTarget.blur()}
-                    onChange={(e) =>
-                      handleItemChange(index, "cantidad", e.target.value)
-                    }
-                  />
+                  <label className="quotation-mobile-field quotation-mobile-field--quantity">
+                    <span>Cant.</span>
+                    <input
+                      ref={(element) => {
+                        itemInputRefs.current.cantidad[index] = element
+                      }}
+                      type="number"
+                      placeholder="Cant."
+                      value={item.cantidad}
+                      min="0"
+                      step="0.01"
+                      onKeyDown={(event) =>
+                        handleItemNavigation(event, index, "cantidad")
+                      }
+                      onWheel={(event) => event.currentTarget.blur()}
+                      onChange={(e) =>
+                        handleItemChange(index, "cantidad", e.target.value)
+                      }
+                    />
+                  </label>
 
-                  <input
-                    ref={(element) => {
-                      itemInputRefs.current.precioUnitario[index] = element
-                    }}
-                    type="number"
-                    placeholder="P. Unit."
-                    value={item.precioUnitario}
-                    min="0"
-                    step="0.01"
-                    onKeyDown={(event) =>
-                      handleItemNavigation(event, index, "precioUnitario")
-                    }
-                    onWheel={(event) => event.currentTarget.blur()}
-                    onChange={(e) =>
-                      handleItemChange(index, "precioUnitario", e.target.value)
-                    }
-                  />
+                  <label className="quotation-mobile-field quotation-mobile-field--price">
+                    <span>P. Unit</span>
+                    <input
+                      ref={(element) => {
+                        itemInputRefs.current.precioUnitario[index] = element
+                      }}
+                      type="number"
+                      placeholder="P. Unit."
+                      value={item.precioUnitario}
+                      min="0"
+                      step="0.01"
+                      onKeyDown={(event) =>
+                        handleItemNavigation(event, index, "precioUnitario")
+                      }
+                      onWheel={(event) => event.currentTarget.blur()}
+                      onChange={(e) =>
+                        handleItemChange(index, "precioUnitario", e.target.value)
+                      }
+                    />
+                  </label>
 
-                  <strong>
-                    S/{" "}
-                    {(
-                      Number(item.cantidad || 0) *
-                      Number(item.precioUnitario || 0)
-                    ).toFixed(2)}
+                  <strong className="quotation-item-subtotal">
+                    <span>Subtotal</span>
+                    <b>
+                      S/{" "}
+                      {(
+                        Number(item.cantidad || 0) *
+                        Number(item.precioUnitario || 0)
+                      ).toFixed(2)}
+                    </b>
                   </strong>
 
                   <button
+                    type="button"
                     className="quotation-remove"
-                    onClick={() => quitarItem(index)}
+                    aria-label="Eliminar producto"
+                    disabled={itemEliminando !== null}
+                    onClick={() => quitarItemConAnimacion(index)}
                   >
-                    ×
+                    <span className="quotation-remove__desktop">×</span>
+                    <span className="quotation-remove__mobile" aria-hidden="true">🗑</span>
                   </button>
                 </div>
               ))}

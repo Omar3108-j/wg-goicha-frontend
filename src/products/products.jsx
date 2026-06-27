@@ -2,7 +2,17 @@ import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { useReveal } from "../hooks/useReveal"
 import { obtenerProductosCatalogo } from "../services/productoService"
-import { Search, ShoppingCart } from "lucide-react"
+import {
+  ChevronDown,
+  FileText,
+  House,
+  Mail,
+  MapPin,
+  Phone,
+  Search,
+  ShoppingCart,
+  UserRound,
+} from "lucide-react"
 import { API_URL } from "../config/api"
 
 function Products({
@@ -20,6 +30,8 @@ function Products({
   const [carrito, setCarrito] = useState([])
   const [cartOpen, setCartOpen] = useState(false)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  /* Checkout customer form UX V2 */
+  const [checkoutMoreOpen, setCheckoutMoreOpen] = useState(false)
   const [busqueda, setBusqueda] = useState("")
   const categoriaActiva = categoriaSeleccionada || "TODOS"
   const [cartAnimado, setCartAnimado] = useState(false)
@@ -33,6 +45,7 @@ function Products({
   const [ultimoAgregadoKey, setUltimoAgregadoKey] = useState(null)
   const feedbackAgregadoTimeout = useRef(null)
   const productModalScrollPosition = useRef(0)
+  const productsGridRef = useRef(null)
 
   const [form, setForm] = useState({
     cliente: "",
@@ -383,6 +396,49 @@ function Products({
   const indicePrimerProducto = indiceUltimoProducto - productosPorPagina
   const productosPaginados = productosFiltrados.slice(indicePrimerProducto, indiceUltimoProducto)
 
+  /* Premium catalog pagination V1 */
+  const obtenerPaginasVisibles = () => {
+    if (totalPaginas <= 5) {
+      return Array.from({ length: totalPaginas }, (_, index) => index + 1)
+    }
+
+    if (paginaActualSegura <= 3) {
+      return [1, 2, 3, 4, "ellipsis-end", totalPaginas]
+    }
+
+    if (paginaActualSegura >= totalPaginas - 2) {
+      return [1, "ellipsis-start", totalPaginas - 3, totalPaginas - 2, totalPaginas - 1, totalPaginas]
+    }
+
+    return [
+      1,
+      "ellipsis-start",
+      paginaActualSegura - 1,
+      paginaActualSegura,
+      paginaActualSegura + 1,
+      "ellipsis-end",
+      totalPaginas,
+    ]
+  }
+
+  const cambiarPagina = (nuevaPagina) => {
+    if (
+      nuevaPagina < 1 ||
+      nuevaPagina > totalPaginas ||
+      nuevaPagina === paginaActualSegura
+    ) {
+      return
+    }
+
+    setPaginaActual(nuevaPagina)
+    window.setTimeout(() => {
+      productsGridRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }, 50)
+  }
+
   return (
     <section id="productos" ref={prodRef} className="catalog-section">
       <div className="catalog-dots" />
@@ -470,7 +526,7 @@ function Products({
           </div>
         )}
 
-        <div className="catalog-grid">
+        <div ref={productsGridRef} className="catalog-grid">
           {productosPaginados.map((prod, index) => {
             const tieneVariantes = productosConVariantes.includes(prod.id)
 
@@ -561,23 +617,56 @@ function Products({
         </div>
 
         {!loading && totalPaginas > 1 && (
-          <div className="catalog-pagination">
+          <nav className="catalog-pagination" aria-label="Paginación del catálogo">
             <button
               type="button"
+              className="catalog-pagination__nav"
               disabled={paginaActualSegura === 1}
-              onClick={() => setPaginaActual(paginaActualSegura - 1)}
+              onClick={() => cambiarPagina(paginaActualSegura - 1)}
+              aria-label="Página anterior"
             >
-              ← Anterior
+              <span aria-hidden="true">←</span>
+              <span className="catalog-pagination__nav-label">Anterior</span>
             </button>
-            <span>Página {paginaActualSegura} de {totalPaginas}</span>
+
+            <div className="catalog-pagination__pages">
+              {obtenerPaginasVisibles().map((pagina) =>
+                typeof pagina === "number" ? (
+                  <button
+                    key={pagina}
+                    type="button"
+                    className={`catalog-pagination__page ${
+                      pagina === paginaActualSegura ? "is-active" : ""
+                    }`}
+                    onClick={() => cambiarPagina(pagina)}
+                    aria-label={`Ir a la página ${pagina}`}
+                    aria-current={pagina === paginaActualSegura ? "page" : undefined}
+                  >
+                    {pagina}
+                  </button>
+                ) : (
+                  <span
+                    key={pagina}
+                    className="catalog-pagination__ellipsis"
+                    aria-hidden="true"
+                  >
+                    …
+                  </span>
+                )
+              )}
+            </div>
+
             <button
               type="button"
+              className="catalog-pagination__nav"
               disabled={paginaActualSegura === totalPaginas}
-              onClick={() => setPaginaActual(paginaActualSegura + 1)}
+              onClick={() => cambiarPagina(paginaActualSegura + 1)}
+              aria-label="Página siguiente"
             >
-              Siguiente →
+              <span className="catalog-pagination__nav-label">Siguiente</span>
+              <span aria-hidden="true">→</span>
             </button>
-          </div>
+          </nav>
         )}
 
         <div className="catalog-cta">
@@ -704,7 +793,30 @@ function Products({
             </div>
 
             {carrito.length === 0 ? (
-              <p className="cart-empty">Tu carrito está vacío.</p>
+              /* Empty cart CTA V1 */
+              <div className="cart-empty">
+                <div className="cart-empty__icon" aria-hidden="true">
+                  <ShoppingCart size={30} strokeWidth={1.8} />
+                </div>
+                <h3>Tu carrito está vacío</h3>
+                <p>Aún no has agregado productos.
+                  Explora nuestro catálogo y encuentra las mejores opciones para tu compra.</p>
+                <button
+                  type="button"
+                  className="cart-empty__button"
+                  onClick={() => {
+                    setCartOpen(false)
+                    window.setTimeout(() => {
+                      document.getElementById("productos")?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start",
+                      })
+                    }, 100)
+                  }}
+                >
+                  Explorar productos
+                </button>
+              </div>
             ) : (
               <>
                 <div className="cart-items">
@@ -750,7 +862,11 @@ function Products({
                   {!checkoutOpen && (
                     <button
                       className="cart-confirm-button"
-                      onClick={() => { setCartOpen(false); setCheckoutOpen(true) }}
+                      onClick={() => {
+                        setCartOpen(false)
+                        setCheckoutMoreOpen(false)
+                        setCheckoutOpen(true)
+                      }}
                     >
                       Continuar pedido
                     </button>
@@ -774,29 +890,121 @@ function Products({
               <h2>Datos para tu pedido</h2>
               <span>Completa tus datos para registrar tu pedido. Luego podrás enviar el resumen por WhatsApp.</span>
               <div className="checkout-form">
-                <div className="checkout-group">
-                  <label>Nombre completo *</label>
-                  <input name="cliente" value={form.cliente} onChange={handleChange} />
-                </div>
-                <div className="checkout-group">
-                  <label>Teléfono / WhatsApp *</label>
-                  <input name="telefono" value={form.telefono} onChange={handleChange} inputMode="numeric" maxLength="15" />
-                </div>
-                <div className="checkout-group">
-                  <label>Correo</label>
-                  <input name="correo" value={form.correo} onChange={handleChange} />
-                </div>
-                <div className="checkout-group">
-                  <label>Distrito</label>
-                  <input name="distrito" value={form.distrito} onChange={handleChange} />
-                </div>
-                <div className="checkout-group">
-                  <label>Dirección</label>
-                  <input name="direccion" value={form.direccion} onChange={handleChange} />
-                </div>
-                <div className="checkout-group">
-                  <label>Observaciones</label>
-                  <textarea name="observaciones" value={form.observaciones} onChange={handleChange} />
+                <section className="checkout-form-section checkout-form-section--customer">
+                  <h3>Información del cliente</h3>
+                  <div className="checkout-section-grid">
+                    <div className="checkout-group checkout-group--name">
+                      <label htmlFor="checkout-cliente">Nombre completo *</label>
+                      <span className="checkout-field-control">
+                        <UserRound className="checkout-field-icon" size={18} aria-hidden="true" />
+                        <input
+                          id="checkout-cliente"
+                          name="cliente"
+                          value={form.cliente}
+                          onChange={handleChange}
+                          autoComplete="name"
+                          required
+                        />
+                      </span>
+                    </div>
+                    <div className="checkout-group checkout-group--phone">
+                      <label htmlFor="checkout-telefono">Teléfono / WhatsApp *</label>
+                      <span className="checkout-field-control">
+                        <Phone className="checkout-field-icon" size={18} aria-hidden="true" />
+                        <input
+                          id="checkout-telefono"
+                          name="telefono"
+                          type="tel"
+                          value={form.telefono}
+                          onChange={handleChange}
+                          inputMode="numeric"
+                          maxLength="15"
+                          autoComplete="tel"
+                          required
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </section>
+
+                <button
+                  type="button"
+                  className={`checkout-more-toggle ${checkoutMoreOpen ? "is-open" : ""}`}
+                  aria-expanded={checkoutMoreOpen}
+                  aria-controls="checkout-optional-fields"
+                  onClick={() => setCheckoutMoreOpen((open) => !open)}
+                >
+                  Más información (opcional)
+                  <ChevronDown size={18} aria-hidden="true" />
+                </button>
+
+                <div
+                  id="checkout-optional-fields"
+                  className={`checkout-optional-fields ${checkoutMoreOpen ? "is-open" : ""}`}
+                >
+                  <section className="checkout-form-section checkout-form-section--address">
+                    <h3>Dirección <span>(opcional)</span></h3>
+                    <div className="checkout-section-grid">
+                      <div className="checkout-group checkout-group--district">
+                        <label htmlFor="checkout-distrito">Distrito</label>
+                        <span className="checkout-field-control">
+                          <MapPin className="checkout-field-icon" size={18} aria-hidden="true" />
+                          <input
+                            id="checkout-distrito"
+                            name="distrito"
+                            value={form.distrito}
+                            onChange={handleChange}
+                            autoComplete="address-level2"
+                          />
+                        </span>
+                      </div>
+                      <div className="checkout-group checkout-group--address">
+                        <label htmlFor="checkout-direccion">Dirección</label>
+                        <span className="checkout-field-control">
+                          <House className="checkout-field-icon" size={18} aria-hidden="true" />
+                          <input
+                            id="checkout-direccion"
+                            name="direccion"
+                            value={form.direccion}
+                            onChange={handleChange}
+                            autoComplete="street-address"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="checkout-form-section checkout-form-section--additional">
+                    <h3>Información adicional <span>(opcional)</span></h3>
+                    <div className="checkout-section-grid">
+                      <div className="checkout-group checkout-group--email">
+                        <label htmlFor="checkout-correo">Correo</label>
+                        <span className="checkout-field-control">
+                          <Mail className="checkout-field-icon" size={18} aria-hidden="true" />
+                          <input
+                            id="checkout-correo"
+                            name="correo"
+                            type="email"
+                            value={form.correo}
+                            onChange={handleChange}
+                            autoComplete="email"
+                          />
+                        </span>
+                      </div>
+                      <div className="checkout-group checkout-group--observations">
+                        <label htmlFor="checkout-observaciones">Observaciones</label>
+                        <span className="checkout-field-control checkout-field-control--textarea">
+                          <FileText className="checkout-field-icon" size={18} aria-hidden="true" />
+                          <textarea
+                            id="checkout-observaciones"
+                            name="observaciones"
+                            value={form.observaciones}
+                            onChange={handleChange}
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </section>
                 </div>
               </div>
               <button className="checkout-confirm" onClick={confirmarPedido}>
