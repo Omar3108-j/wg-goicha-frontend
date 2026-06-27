@@ -614,13 +614,13 @@ const obtenerUrlPdfCotizacion = (cotizacionId) =>
   `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
 
 const descargarPdfCotizacion = (cotizacionId) => {
-  const enlace = document.createElement("a")
-  enlace.href = obtenerUrlPdfCotizacion(cotizacionId)
-  enlace.target = "_blank"
-  enlace.rel = "noopener noreferrer"
-  document.body.appendChild(enlace)
-  enlace.click()
-  enlace.remove()
+  const descarga = document.createElement("iframe")
+  descarga.src = obtenerUrlPdfCotizacion(cotizacionId)
+  descarga.title = "Descarga de cotización"
+  descarga.style.display = "none"
+  document.body.appendChild(descarga)
+
+  window.setTimeout(() => descarga.remove(), 60000)
 }
 
 /* Quotation WhatsApp message cleanup V1 */
@@ -628,26 +628,26 @@ const enviarCotizacion = async (cot) => {
   const codigo =
     cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
   const mensaje = [
-    `Hola ${cot.cliente || ""} \u{1F44B}`,
+    `Hola *${cot.cliente || ""}* \u{1F44B}`,
     "",
-    `Te compartimos la cotización ${codigo} de W&G Corporación Goicha E.I.R.L.`,
+    `Adjuntamos la cotización *${codigo}* realizada por *W&G Corporación Goicha E.I.R.L.*`,
     "",
-    `Total: S/ ${Number(cot.total || 0).toFixed(2)}`,
+    `Total: *S/ ${Number(cot.total || 0).toFixed(2)}*`,
     "",
-    "Adjunto encontrarás el PDF con el detalle de productos, precios y condiciones.",
+    "El archivo PDF ya fue descargado automáticamente para que puedas adjuntarlo fácilmente a esta conversación.",
     "",
-    "Quedamos atentos a cualquier consulta.",
-    "",
-    "Saludos,",
-    "W&G Corporación Goicha",
+    "Muchas gracias por confiar en nosotros.",
   ].join("\n")
 
   descargarPdfCotizacion(cot.id)
-  window.open(
-    `https://wa.me/?text=${encodeURIComponent(mensaje)}`,
-    "_blank",
-    "noopener,noreferrer"
-  )
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`
+  const whatsappWindow = window.open(whatsappUrl, "_blank")
+
+  if (whatsappWindow) {
+    whatsappWindow.opener = null
+  } else {
+    window.setTimeout(() => window.location.assign(whatsappUrl), 300)
+  }
 
   try {
     await cambiarEstadoCotizacion(cot, "ENVIADA")

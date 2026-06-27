@@ -1769,23 +1769,34 @@
 }
 
 /* Final UX polish V1 */
+/* Quotation summary total overflow fix */
 .quotation-total-line,
 .quotation-total-main {
   min-width: 0;
+}
+
+.quotation-total-main {
+  flex-wrap: wrap;
+}
+
+.quotation-total-main span {
+  flex: 0 0 auto;
 }
 
 .quotation-total-line strong,
 .quotation-total-main strong,
 .quotation-total-main strong:last-child {
   min-width: 0;
-  max-width: 72%;
+  max-width: 100%;
   overflow-wrap: anywhere;
+  word-break: break-word;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
 .quotation-total-main strong,
 .quotation-total-main strong:last-child {
+  flex: 1 1 160px;
   font-size: clamp(22px, 3vw, 32px);
   line-height: 1.08;
 }
@@ -1798,7 +1809,8 @@
 
   .quotation-total-main strong,
   .quotation-total-main strong:last-child {
-    max-width: 68%;
-    font-size: clamp(19px, 6.2vw, 24px) !important;
+    flex-basis: 130px;
+    max-width: 100%;
+    font-size: clamp(18px, 6vw, 24px) !important;
   }
 }
