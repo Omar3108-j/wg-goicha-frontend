@@ -4,6 +4,7 @@ import axios from "axios"
 import { API_URL } from "../../config/api"
 import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
+import { compressProductImage, isImageUploadTooLarge } from "../../utils/imageCompression"
 
 function EditProduct() {
   const { id } = useParams()
@@ -66,8 +67,15 @@ function EditProduct() {
       let imageUrl = form.imagenActual
 
       if (imagenNueva) {
+        const imageToUpload = await compressProductImage(imagenNueva)
+
+        if (isImageUploadTooLarge(imageToUpload)) {
+          showToast("La imagen es muy pesada. Usa una imagen menor a 1 MB.", "warning")
+          return
+        }
+
         const formData = new FormData()
-        formData.append("file", imagenNueva)
+        formData.append("file", imageToUpload)
         const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
         imageUrl = uploadRes.data
       }
@@ -86,7 +94,11 @@ function EditProduct() {
       navigate("/admin/productos")
     } catch (error) {
       console.error("Error actualizando producto:", error)
-      showToast("Error al actualizar producto", "error")
+      const isTooLarge = error?.response?.status === 413
+      showToast(
+        isTooLarge ? "La imagen es demasiado pesada para subirla." : "Error al actualizar producto",
+        "error"
+      )
     } finally {
       setLoading(false)
     }

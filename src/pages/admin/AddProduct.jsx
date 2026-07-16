@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { API_URL } from "../../config/api"
 import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
+import { compressProductImage, isImageUploadTooLarge } from "../../utils/imageCompression"
 
 function AddProduct() {
   const { showToast } = useAdminNotifications()
@@ -49,8 +50,15 @@ function AddProduct() {
       let imageUrl = ""
 
       if (imagen) {
+        const imageToUpload = await compressProductImage(imagen)
+
+        if (isImageUploadTooLarge(imageToUpload)) {
+          showToast("La imagen es muy pesada. Usa una imagen menor a 1 MB.", "warning")
+          return
+        }
+
         const formData = new FormData()
-        formData.append("file", imagen)
+        formData.append("file", imageToUpload)
         const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
         imageUrl = uploadRes.data
       }
@@ -72,7 +80,11 @@ function AddProduct() {
       navigate("/admin/productos")
     } catch (error) {
       console.error("Error al crear producto:", error)
-      showToast("Error al crear producto", "error")
+      const isTooLarge = error?.response?.status === 413
+      showToast(
+        isTooLarge ? "La imagen es demasiado pesada para subirla." : "Error al crear producto",
+        "error"
+      )
     } finally {
       setLoading(false)
     }
