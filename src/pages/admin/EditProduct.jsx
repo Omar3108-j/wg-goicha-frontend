@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
-import { API_URL } from "../../config/api"
+import { API_URL, resolveAssetUrl } from "../../config/api"
 import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 import { compressProductImage, isImageUploadTooLarge } from "../../utils/imageCompression"
@@ -218,7 +218,7 @@ function EditProduct() {
             <div className="form-group">
               <label>Imagen actual</label>
               <div className="admin-preview-image">
-                <img src={form.imagenActual} alt={form.nombre} />
+                <img src={resolveAssetUrl(form.imagenActual)} alt={form.nombre} />
               </div>
               <label style={{ marginTop: "10px" }}>Cambiar imagen</label>
               <input type="file" accept="image/*" onChange={handleFileChange} />

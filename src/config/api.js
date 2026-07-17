@@ -1,4 +1,4 @@
-const configuredApiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+export const RAW_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const normalizeSameDomainApiUrl = (url) => {
   if (typeof window === "undefined") return url;
@@ -30,4 +30,16 @@ const normalizeSameDomainApiUrl = (url) => {
 };
 
 /* Same-domain API URL normalization V1 */
-export const API_URL = normalizeSameDomainApiUrl(configuredApiUrl);
+export const API_URL = normalizeSameDomainApiUrl(RAW_API_URL);
+
+/* Backend asset URL normalization V1 */
+export const resolveAssetUrl = (url) => {
+  if (!url) return "";
+  if (/^(https?:|data:|blob:)/i.test(url)) return url;
+
+  try {
+    return new URL(url, RAW_API_URL).toString();
+  } catch {
+    return url;
+  }
+};

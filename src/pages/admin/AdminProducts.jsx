@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"
 import axios from "axios"
 import AdminLayout from "../../components/admin/AdminLayout"
 import AdminPagination from "../../components/admin/AdminPagination"
-import { API_URL } from "../../config/api"
+import { API_URL, resolveAssetUrl } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
 
 function AdminProducts() {
@@ -271,7 +271,7 @@ const productosPaginados = productosFiltrados.slice(indicePrimero, indiceUltimo)
               <div className="admin-product-info">
                 <div className="admin-product-img">
                   {prod.imagen ? (
-                    <img src={prod.imagen} alt={prod.nombre} />
+                    <img src={resolveAssetUrl(prod.imagen)} alt={prod.nombre} />
                   ) : (
                     <span>🔧</span>
                   )}

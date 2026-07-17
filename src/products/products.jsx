@@ -13,7 +13,7 @@ import {
   ShoppingCart,
   UserRound,
 } from "lucide-react"
-import { API_URL } from "../config/api"
+import { API_URL, resolveAssetUrl } from "../config/api"
 
 function Products({
   whatsappUrl,
@@ -571,7 +571,7 @@ function Products({
                   }}
                 >
                   {prod.imagen
-                    ? <img src={prod.imagen} alt={prod.nombre} loading="lazy" />
+                    ? <img src={resolveAssetUrl(prod.imagen)} alt={prod.nombre} loading="lazy" />
                     : <span>🔧</span>
                   }
                 </div>
@@ -708,7 +708,7 @@ function Products({
             <button className="product-modal__close" onClick={() => setSelectedProduct(null)}>×</button>
             <div className="product-modal__image">
               {selectedProduct.imagen
-                ? <img src={selectedProduct.imagen} alt={selectedProduct.nombre} loading="lazy" />
+                ? <img src={resolveAssetUrl(selectedProduct.imagen)} alt={selectedProduct.nombre} loading="lazy" />
                 : <span>🔧</span>
               }
             </div>
@@ -845,7 +845,7 @@ function Products({
                   {carrito.map((item) => (
                     <div key={item.keyCarrito || item.id} className="cart-item">
                       <div className="cart-item-img">
-                        {item.imagen ? <img src={item.imagen} alt={item.nombre} /> : "🔧"}
+                        {item.imagen ? <img src={resolveAssetUrl(item.imagen)} alt={item.nombre} /> : "🔧"}
                       </div>
                       <div className="cart-item-info">
                         <h3>{item.nombre}</h3>
@@ -1045,7 +1045,7 @@ function Products({
                   {carrito.map((item) => (
                     <div key={item.keyCarrito} className="checkout-summary-item premium">
                       <div className="checkout-summary-img">
-                        {item.imagen ? <img src={item.imagen} alt={item.nombre} /> : <span>🔧</span>}
+                        {item.imagen ? <img src={resolveAssetUrl(item.imagen)} alt={item.nombre} /> : <span>🔧</span>}
                       </div>
                       <div className="checkout-summary-info">
                         <strong>{item.nombre}</strong>

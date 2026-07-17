@@ -1,5 +1,6 @@
 import { useRef } from "react"
 import { useReveal } from "../hooks/useReveal"
+import { resolveAssetUrl } from "../config/api"
 
 function Categories({ whatsappUrl, onSelectCategory, categorias = [] }) {
   const [catRef, catVisible] = useReveal()
@@ -56,7 +57,7 @@ function Categories({ whatsappUrl, onSelectCategory, categorias = [] }) {
                   className="category-premium-card"
                   style={{
                     backgroundImage: cat.imagen
-                      ? `url(${cat.imagen})`
+                      ? `url(${resolveAssetUrl(cat.imagen)})`
                       : "linear-gradient(135deg, #111827, #ef4444)",
                   }}
                   onClick={() => {

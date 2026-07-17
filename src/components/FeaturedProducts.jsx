@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { obtenerProductosCatalogo } from "../services/productoService"
+import { resolveAssetUrl } from "../config/api"
 
 function FeaturedProducts() {
   const [productos, setProductos] = useState([])
@@ -68,7 +69,7 @@ function FeaturedProducts() {
               <div key={prod.id} className="featured-card">
                 <span className="featured-badge">Destacado</span>
 
-                <img src={prod.imagen} alt={prod.nombre} loading="lazy" />
+                <img src={resolveAssetUrl(prod.imagen)} alt={prod.nombre} loading="lazy" />
 
                 <div className="featured-body">
                   <h3>{prod.nombre}</h3>

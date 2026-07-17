@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import axios from "axios"
 import "../../styles/admin-categories.css"
-import { API_URL } from "../../config/api"
+import { API_URL, resolveAssetUrl } from "../../config/api"
 import AdminModuleFormHeader from "./AdminModuleFormHeader"
 import AdminPagination from "./AdminPagination"
 import { useAdminNotifications } from "./useAdminNotifications"
@@ -242,7 +242,7 @@ function CategoriasAdmin() {
               <div className="admin-categories__card" key={categoria.id}>
                 <div className="admin-categories__image">
                   {categoria.imagen ? (
-                    <img src={categoria.imagen} alt={categoria.nombre} />
+                    <img src={resolveAssetUrl(categoria.imagen)} alt={categoria.nombre} />
                   ) : (
                     <span>Sin imagen</span>
                   )}
