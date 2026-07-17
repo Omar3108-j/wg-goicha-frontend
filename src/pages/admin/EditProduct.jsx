@@ -65,6 +65,7 @@ function EditProduct() {
 
     try {
       let imageUrl = form.imagenActual
+      let imageUploadWarning = ""
 
       if (imagenNueva) {
         const imageToUpload = await compressProductImage(imagenNueva)
@@ -76,8 +77,16 @@ function EditProduct() {
 
         const formData = new FormData()
         formData.append("file", imageToUpload)
-        const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
-        imageUrl = uploadRes.data
+
+        try {
+          const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
+          imageUrl = uploadRes.data
+        } catch (uploadError) {
+          console.error("Error al subir nueva imagen del producto:", uploadError)
+          imageUploadWarning = form.imagenActual
+            ? "Producto actualizado. No se pudo cambiar la imagen, se mantuvo la anterior."
+            : "Producto actualizado sin imagen. Puedes intentar subirla luego."
+        }
       }
 
       await axios.put(`${API_URL}/api/productos/${id}`, {
@@ -90,7 +99,10 @@ function EditProduct() {
         categoria: { id: form.categoriaId },
       })
 
-      showToast("Producto actualizado correctamente", "success")
+      showToast(
+        imageUploadWarning || "Producto actualizado correctamente",
+        imageUploadWarning ? "warning" : "success"
+      )
       navigate("/admin/productos")
     } catch (error) {
       console.error("Error actualizando producto:", error)

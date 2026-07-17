@@ -48,6 +48,7 @@ function AddProduct() {
 
     try {
       let imageUrl = ""
+      let imageUploadWarning = ""
 
       if (imagen) {
         const imageToUpload = await compressProductImage(imagen)
@@ -59,8 +60,14 @@ function AddProduct() {
 
         const formData = new FormData()
         formData.append("file", imageToUpload)
-        const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
-        imageUrl = uploadRes.data
+
+        try {
+          const uploadRes = await axios.post(`${API_URL}/api/upload`, formData)
+          imageUrl = uploadRes.data
+        } catch (uploadError) {
+          console.error("Error al subir imagen del producto:", uploadError)
+          imageUploadWarning = "Producto creado sin imagen. Puedes intentar subirla luego."
+        }
       }
 
       await axios.post(`${API_URL}/api/productos`, {
@@ -73,7 +80,7 @@ function AddProduct() {
         categoria: { id: form.categoriaId },
       })
 
-      showToast("Producto creado correctamente", "success")
+      showToast(imageUploadWarning || "Producto creado correctamente", imageUploadWarning ? "warning" : "success")
       setForm({ nombre: "", descripcion: "", tipo: "", marca: "", precio: "", categoriaId: "" })
       setImagen(null)
       setPreview(null)
