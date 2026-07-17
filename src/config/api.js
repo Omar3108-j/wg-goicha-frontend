@@ -6,6 +6,15 @@ const normalizeSameDomainApiUrl = (url) => {
   try {
     const apiUrl = new URL(url);
     const currentUrl = new URL(window.location.origin);
+    const localHosts = ["localhost", "127.0.0.1", "0.0.0.0"];
+
+    if (
+      localHosts.includes(apiUrl.hostname) ||
+      localHosts.includes(currentUrl.hostname)
+    ) {
+      return url;
+    }
+
     const normalizeHost = (host) => host.replace(/^www\./, "");
     const isSameDomain = normalizeHost(apiUrl.hostname) === normalizeHost(currentUrl.hostname);
     const isSameProtocol = apiUrl.protocol === currentUrl.protocol;

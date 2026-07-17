@@ -19,9 +19,11 @@ function AdminOrders() {
   const cargarPedidos = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/pedidos`)
-      setPedidos(res.data)
+      /* Admin orders safe API data V1 */
+      setPedidos(Array.isArray(res.data) ? res.data : [])
     } catch (error) {
       console.error("Error cargando pedidos:", error)
+      setPedidos([])
     } finally {
       setLoading(false)
     }
@@ -31,9 +33,11 @@ function AdminOrders() {
     const cargarPedidosIniciales = async () => {
       try {
         const res = await axios.get(`${API_URL}/api/pedidos`)
-        setPedidos(res.data)
+        /* Admin orders safe API data V1 */
+        setPedidos(Array.isArray(res.data) ? res.data : [])
       } catch (error) {
         console.error("Error cargando pedidos:", error)
+        setPedidos([])
       } finally {
         setLoading(false)
       }
@@ -86,7 +90,10 @@ function AdminOrders() {
     return true
   }
 
-  const pedidosFiltrados = pedidos.filter((pedido) => {
+  /* Admin orders safe API data V1 */
+  const pedidosSeguros = Array.isArray(pedidos) ? pedidos : []
+
+  const pedidosFiltrados = pedidosSeguros.filter((pedido) => {
     const texto =
       `${pedido.codigo || ""} ${pedido.cliente || ""} ${pedido.telefono || ""}`.toLowerCase()
     const coincideBusqueda = texto.includes(busquedaPedido.toLowerCase())
@@ -97,17 +104,17 @@ function AdminOrders() {
     return coincideBusqueda && coincideEstado && pedidoCoincideFecha(pedido)
   })
 
-  const totalPedidos = pedidos.length
-  const totalPendientes = pedidos.filter(
+  const totalPedidos = pedidosSeguros.length
+  const totalPendientes = pedidosSeguros.filter(
     (pedido) => (pedido.estado || "PENDIENTE").toUpperCase() === "PENDIENTE"
   ).length
-  const totalEnProceso = pedidos.filter(
+  const totalEnProceso = pedidosSeguros.filter(
     (pedido) => (pedido.estado || "").toUpperCase() === "EN_PROCESO"
   ).length
-  const totalEntregados = pedidos.filter(
+  const totalEntregados = pedidosSeguros.filter(
     (pedido) => (pedido.estado || "").toUpperCase() === "ENTREGADO"
   ).length
-  const totalAnulados = pedidos.filter(
+  const totalAnulados = pedidosSeguros.filter(
     (pedido) => (pedido.estado || "").toUpperCase() === "ANULADO"
   ).length
 
@@ -136,20 +143,20 @@ function AdminOrders() {
 
           <div className="admin-dashboard-status">
             <span>Total</span>
-            <strong>{pedidos.length}</strong>
+            <strong>{pedidosSeguros.length}</strong>
           </div>
         </div>
 
         {loading && <p className="admin-empty">Cargando pedidos...</p>}
 
-        {!loading && pedidos.length === 0 && (
+        {!loading && pedidosSeguros.length === 0 && (
           <div className="admin-panel-card admin-orders-empty">
             <h2>No hay pedidos registrados</h2>
             <p>Cuando un cliente confirme su carrito, aparecerá aquí automáticamente.</p>
           </div>
         )}
 
-        {!loading && pedidos.length > 0 && (
+        {!loading && pedidosSeguros.length > 0 && (
           <div className="admin-orders-tools">
             <div className="admin-orders-stats">
               <div>
@@ -266,7 +273,7 @@ function AdminOrders() {
               <div className="admin-order-products">
                 <h3>Productos</h3>
 
-                {pedido.detalles?.map((item) => (
+                {(Array.isArray(pedido.detalles) ? pedido.detalles : []).map((item) => (
                   <div key={item.id} className="admin-order-product">
                     <span>{item.productoNombre}</span>
                     <strong>
@@ -303,7 +310,7 @@ function AdminOrders() {
           ))}
         </div>
 
-        {!loading && pedidos.length > 0 && pedidosFiltrados.length === 0 && (
+        {!loading && pedidosSeguros.length > 0 && pedidosFiltrados.length === 0 && (
           <div className="admin-orders-no-results">
             No hay pedidos que coincidan con los filtros.
           </div>

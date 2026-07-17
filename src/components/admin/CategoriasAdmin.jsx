@@ -23,14 +23,26 @@ function CategoriasAdmin() {
   })
 
   const cargarCategorias = async () => {
-    const res = await axios.get(`${API_URL}/api/categorias`)
-    setCategorias(res.data)
+    try {
+      const res = await axios.get(`${API_URL}/api/categorias`)
+      /* Admin categories safe API data V1 */
+      setCategorias(Array.isArray(res.data) ? res.data : [])
+    } catch (error) {
+      console.error("Error cargando categorÃ­as:", error)
+      setCategorias([])
+    }
   }
 
   useEffect(() => {
     const cargarCategoriasIniciales = async () => {
-      const res = await axios.get(`${API_URL}/api/categorias`)
-      setCategorias(res.data)
+      try {
+        const res = await axios.get(`${API_URL}/api/categorias`)
+        /* Admin categories safe API data V1 */
+        setCategorias(Array.isArray(res.data) ? res.data : [])
+      } catch (error) {
+        console.error("Error cargando categorÃ­as:", error)
+        setCategorias([])
+      }
     }
 
     cargarCategoriasIniciales()
@@ -127,13 +139,16 @@ function CategoriasAdmin() {
     }
   }
 
+  /* Admin categories safe API data V1 */
+  const categoriasSeguras = Array.isArray(categorias) ? categorias : []
+
   const totalPaginas = Math.max(
     1,
-    Math.ceil(categorias.length / categoriasPorPagina)
+    Math.ceil(categoriasSeguras.length / categoriasPorPagina)
   )
   const paginaActualSegura = Math.min(paginaActual, totalPaginas)
   const indiceInicial = (paginaActualSegura - 1) * categoriasPorPagina
-  const categoriasPaginadas = categorias.slice(
+  const categoriasPaginadas = categoriasSeguras.slice(
     indiceInicial,
     indiceInicial + categoriasPorPagina
   )
@@ -218,7 +233,7 @@ function CategoriasAdmin() {
           </div>
 
           <div className="admin-categories__stat">
-            <strong>{categorias.length}</strong>
+            <strong>{categoriasSeguras.length}</strong>
             <span>Categorías registradas</span>
           </div>
 

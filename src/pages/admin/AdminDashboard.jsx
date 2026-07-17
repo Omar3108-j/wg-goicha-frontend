@@ -12,62 +12,61 @@ import {
   CartesianGrid,
   PieChart,
   Pie,
-  Cell
+  Cell,
 } from "recharts"
-
-
 
 function AdminDashboard() {
   const [stats, setStats] = useState({
-  productos: 0,
-  pedidos: 0,
-  cotizaciones: 0,
-})
+    productos: 0,
+    pedidos: 0,
+    cotizaciones: 0,
+  })
+  const [ventasMensuales, setVentasMensuales] = useState([])
+  const [estadosPedidos, setEstadosPedidos] = useState([])
 
+  const COLORS = ["#10b981", "#7c3aed", "#ef4444"]
 
-const [ventasMensuales, setVentasMensuales] = useState([])
-const [estadosPedidos, setEstadosPedidos] = useState([])
+  useEffect(() => {
+    const cargarStats = async () => {
+      try {
+        const [
+          productosRes,
+          pedidosRes,
+          cotizacionesRes,
+          ventasRes,
+          estadosRes,
+        ] = await Promise.all([
+          axios.get(`${API_URL}/api/productos`),
+          axios.get(`${API_URL}/api/pedidos`),
+          axios.get(`${API_URL}/api/cotizaciones`),
+          axios.get(`${API_URL}/api/dashboard/ventas-mensuales`),
+          axios.get(`${API_URL}/api/dashboard/estado-pedidos`),
+        ])
 
-const COLORS = ["#10b981", "#7c3aed", "#ef4444"]
+        /* Dashboard safe API data V1 */
+        const productos = Array.isArray(productosRes.data) ? productosRes.data : []
+        const pedidos = Array.isArray(pedidosRes.data) ? pedidosRes.data : []
+        const cotizaciones = Array.isArray(cotizacionesRes.data) ? cotizacionesRes.data : []
+        const ventas = Array.isArray(ventasRes.data) ? ventasRes.data : []
+        const estados = Array.isArray(estadosRes.data) ? estadosRes.data : []
 
-useEffect(() => {
-  const cargarStats = async () => {
-    try {
-      const [
-  productosRes,
-  pedidosRes,
-  cotizacionesRes,
-  ventasRes,
-  estadosRes,
-] = await Promise.all([
-  axios.get(`${API_URL}/api/productos`),
-  axios.get(`${API_URL}/api/pedidos`),
-  axios.get(`${API_URL}/api/cotizaciones`),
-  axios.get(`${API_URL}/api/dashboard/ventas-mensuales`),
-  axios.get(`${API_URL}/api/dashboard/estado-pedidos`),
-])
-
-setStats({
-  productos: productosRes.data?.length || 0,
-  pedidos: pedidosRes.data?.length || 0,
-  cotizaciones: cotizacionesRes.data?.length || 0,
-})
-
-setVentasMensuales(ventasRes.data || [])
-setEstadosPedidos(estadosRes.data || [])
-
-      setStats({
-        productos: productosRes.data.length,
-        pedidos: pedidosRes.data.length,
-        cotizaciones: cotizacionesRes.data.length,
-      })
-    } catch (error) {
-      console.error("Error cargando estadísticas:", error)
+        setStats({
+          productos: productos.length,
+          pedidos: pedidos.length,
+          cotizaciones: cotizaciones.length,
+        })
+        setVentasMensuales(ventas)
+        setEstadosPedidos(estados)
+      } catch (error) {
+        console.error("Error cargando estadísticas:", error)
+        setVentasMensuales([])
+        setEstadosPedidos([])
+      }
     }
-  }
 
-  cargarStats()
-}, [])
+    cargarStats()
+  }, [])
+
   return (
     <AdminLayout>
       <section className="admin-dashboard-premium">
@@ -113,65 +112,61 @@ setEstadosPedidos(estadosRes.data || [])
         </div>
 
         <div className="dashboard-metrics-grid">
+          <div className="dashboard-chart-card">
+            <div className="dashboard-card-header">
+              <div>
+                <span>MÉTRICAS COMERCIALES</span>
+                <h2>Ventas mensuales</h2>
+              </div>
+            </div>
 
-  {/* GRÁFICO PRINCIPAL */}
-  <div className="dashboard-chart-card">
-    <div className="dashboard-card-header">
-      <div>
-        <span>MÉTRICAS COMERCIALES</span>
-        <h2>Ventas mensuales</h2>
-      </div>
-    </div>
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={ventasMensuales}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis dataKey="mes" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="ventas"
+                  stroke="#ff5b2e"
+                  strokeWidth={4}
+                  dot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
 
-    <ResponsiveContainer width="100%" height={320}>
-      <LineChart data={ventasMensuales}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-        <XAxis dataKey="mes" />
-        <YAxis />
-        <Tooltip />
-        <Line
-          type="monotone"
-          dataKey="ventas"
-          stroke="#ff5b2e"
-          strokeWidth={4}
-          dot={{ r: 5 }}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  </div>
+          <div className="dashboard-pie-card">
+            <div className="dashboard-card-header">
+              <div>
+                <span>ESTADO PEDIDOS</span>
+                <h2>Resumen</h2>
+              </div>
+            </div>
 
-  {/* PIE CHART */}
-  <div className="dashboard-pie-card">
-    <div className="dashboard-card-header">
-      <div>
-        <span>ESTADO PEDIDOS</span>
-        <h2>Resumen</h2>
-      </div>
-    </div>
-
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={estadosPedidos}
-          cx="50%"
-          cy="50%"
-          outerRadius={90}
-          dataKey="value"
-          label
-        >
-          {estadosPedidos.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={COLORS[index % COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
-    </ResponsiveContainer>
-  </div>
-
-</div>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={estadosPedidos}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={90}
+                  dataKey="value"
+                  label
+                >
+                  {estadosPedidos.map((entry, index) => (
+                    <Cell
+                      key={`cell-${entry.name || index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </section>
     </AdminLayout>
   )

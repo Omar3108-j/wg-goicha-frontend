@@ -21,9 +21,11 @@ function AdminProducts() {
   const cargarProductos = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/productos`)
-      setProductos(res.data)
+      /* Admin products safe API data V1 */
+      setProductos(Array.isArray(res.data) ? res.data : [])
     } catch (error) {
       console.error("Error cargando productos:", error)
+      setProductos([])
     } finally {
       setLoading(false)
     }
@@ -33,9 +35,11 @@ function AdminProducts() {
     const cargarProductosIniciales = async () => {
       try {
         const res = await axios.get(`${API_URL}/api/productos`)
-        setProductos(res.data)
+        /* Admin products safe API data V1 */
+        setProductos(Array.isArray(res.data) ? res.data : [])
       } catch (error) {
         console.error("Error cargando productos:", error)
+        setProductos([])
       } finally {
         setLoading(false)
       }
@@ -101,9 +105,11 @@ const cambiarEstadoProducto = async (producto) => {
   }
 }
 
-const totalProductos = productos.length
-const productosActivos = productos.filter((p) => p.activo !== false).length
-const productosInactivos = productos.filter((p) => p.activo === false).length
+/* Admin products safe API data V1 */
+const productosSeguros = Array.isArray(productos) ? productos : []
+const totalProductos = productosSeguros.length
+const productosActivos = productosSeguros.filter((p) => p.activo !== false).length
+const productosInactivos = productosSeguros.filter((p) => p.activo === false).length
 
 const obtenerCategoriaProducto = (producto) =>
   producto.categoria?.nombre ||
@@ -111,13 +117,13 @@ const obtenerCategoriaProducto = (producto) =>
 
 const categoriasProductos = [
   ...new Set(
-    productos
+    productosSeguros
       .map(obtenerCategoriaProducto)
       .filter(Boolean)
   ),
 ].sort((a, b) => String(a).localeCompare(String(b)))
 
-const productosFiltrados = productos.filter((producto) => {
+const productosFiltrados = productosSeguros.filter((producto) => {
   const categoria = obtenerCategoriaProducto(producto)
   const texto =
     `${producto.nombre || ""} ${producto.marca || ""} ${producto.tipo || ""} ${categoria}`.toLowerCase()
@@ -249,11 +255,11 @@ const productosPaginados = productosFiltrados.slice(indicePrimero, indiceUltimo)
 
         {loading && <p className="admin-empty">Cargando productos...</p>}
 
-        {!loading && productos.length === 0 && (
+        {!loading && productosSeguros.length === 0 && (
           <p className="admin-empty">No hay productos registrados.</p>
         )}
 
-        {!loading && productos.length > 0 && productosFiltrados.length === 0 && (
+        {!loading && productosSeguros.length > 0 && productosFiltrados.length === 0 && (
           <p className="admin-product-filter-empty">
             No hay productos que coincidan con los filtros.
           </p>
