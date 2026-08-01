@@ -28,11 +28,19 @@ const clienteVacio = {
   observaciones: "",
 }
 
+/* Quotation PDF display options V1 */
+const opcionesPdfVacias = {
+  moneda: "PEN",
+  mostrarDetalleIgvPdf: true,
+}
+
 const itemVacio = {
   descripcion: "",
   cantidad: 1,
   precioUnitario: 0,
 }
+
+const obtenerSimboloMoneda = (moneda) => (moneda === "USD" ? "US$" : "S/")
 
 const leerBorradorCotizacion = () => {
   try {
@@ -84,6 +92,11 @@ function AdminQuotations() {
   const [cliente, setCliente] = useState(() => ({
     ...clienteVacio,
     ...(borradorInicial?.cliente || {}),
+  }))
+
+  const [opcionesPdf, setOpcionesPdf] = useState(() => ({
+    ...opcionesPdfVacias,
+    ...(borradorInicial?.opcionesPdf || {}),
   }))
 
   const [items, setItems] = useState(() =>
@@ -138,12 +151,12 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
 
       localStorage.setItem(
         QUOTATION_DRAFT_KEY,
-        JSON.stringify({ cliente, items })
+        JSON.stringify({ cliente, items, opcionesPdf })
       )
     }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [cliente, items])
+  }, [cliente, items, opcionesPdf])
 
   useEffect(() => {
     if (!avisoBorrador) return undefined
@@ -167,6 +180,7 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   const limpiarBorrador = () => {
     localStorage.removeItem(QUOTATION_DRAFT_KEY)
     setCliente({ ...clienteVacio })
+    setOpcionesPdf({ ...opcionesPdfVacias })
     setItems([{ ...itemVacio }])
     setCotizacionEditandoId(null)
     setModoDuplicado(false)
@@ -178,6 +192,15 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
       ...cliente,
       [e.target.name]: e.target.value,
     })
+  }
+
+  const handleOpcionesPdfChange = (e) => {
+    const { name, type, checked, value } = e.target
+
+    setOpcionesPdf((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }))
   }
 
   const buscarProductosInternos = async (index, texto) => {
@@ -341,6 +364,7 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
 
 const subtotal = total / 1.18
 const igv = total - subtotal
+const simboloMoneda = obtenerSimboloMoneda(opcionesPdf.moneda)
 
 const editarCotizacion = (cot) => {
   setMostrarFormulario(true)
@@ -371,6 +395,11 @@ const editarCotizacion = (cot) => {
           },
         ]
   )
+
+  setOpcionesPdf({
+    moneda: cot.moneda || "PEN",
+    mostrarDetalleIgvPdf: cot.mostrarDetalleIgvPdf !== false,
+  })
 
   showToast("Cotización cargada para edición", "info")
 
@@ -412,6 +441,11 @@ const duplicarCotizacion = (cot) => {
         ]
   )
 
+  setOpcionesPdf({
+    moneda: cot.moneda || "PEN",
+    mostrarDetalleIgvPdf: cot.mostrarDetalleIgvPdf !== false,
+  })
+
   window.scrollTo({
     top: 0,
     behavior: "smooth",
@@ -432,6 +466,8 @@ const cancelarEdicion = () => {
     observaciones: "",
   })
 
+  setOpcionesPdf({ ...opcionesPdfVacias })
+
   setItems([
     {
       descripcion: "",
@@ -444,6 +480,7 @@ const cancelarEdicion = () => {
 const nuevaCotizacion = () => {
   setCotizacionEditandoId(null)
   setModoDuplicado(false)
+  setOpcionesPdf({ ...opcionesPdfVacias })
   setMostrarFormulario(true)
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
@@ -629,7 +666,7 @@ const enviarCotizacion = async (cot) => {
     cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
   const mensaje = [ `Hola *${cot.cliente || ""}* 👋`,
     "", `Te compartimos la cotización *${codigo}* preparada por *W&G Corporación Goicha E.I.R.L.*`,
-    "", `💰 *Total cotizado:* S/ ${Number(cot.total || 0).toFixed(2)}`, "",
+    "", `💰 *Total cotizado:* ${obtenerSimboloMoneda(cot.moneda)} ${Number(cot.total || 0).toFixed(2)}`, "",
     "En el archivo adjunto encontrarás el detalle completo de la cotización.",
     "",
     "Quedamos atentos a cualquier consulta o a tu confirmación para coordinar tu pedido.",
@@ -666,6 +703,8 @@ const enviarCotizacion = async (cot) => {
 
     const data = {
       ...cliente,
+      moneda: opcionesPdf.moneda,
+      mostrarDetalleIgvPdf: opcionesPdf.mostrarDetalleIgvPdf,
       detalles: itemsValidos.map((item) => ({
         descripcion: item.descripcion,
         /* PDF quantity format V1: se envía como número; el formato visual pertenece al generador PDF. */
@@ -699,6 +738,8 @@ const enviarCotizacion = async (cot) => {
         direccion: "",
         observaciones: "",
       })
+
+      setOpcionesPdf({ ...opcionesPdfVacias })
 
       setItems([
         {
@@ -877,6 +918,37 @@ const enviarCotizacion = async (cot) => {
               </div>
             </div>
 
+            {/* Quotation PDF display options V1 */}
+            <div className="quotation-pdf-options">
+              <div className="quotation-pdf-options__heading">
+                <span>Opciones del PDF</span>
+                <strong>Formato comercial</strong>
+              </div>
+
+              <label className="quotation-option-field">
+                <span>Moneda</span>
+                <select
+                  name="moneda"
+                  value={opcionesPdf.moneda}
+                  onChange={handleOpcionesPdfChange}
+                >
+                  <option value="PEN">Soles (S/)</option>
+                  <option value="USD">Dólares (US$)</option>
+                </select>
+              </label>
+
+              <label className="quotation-option-toggle">
+                <input
+                  type="checkbox"
+                  name="mostrarDetalleIgvPdf"
+                  checked={opcionesPdf.mostrarDetalleIgvPdf}
+                  onChange={handleOpcionesPdfChange}
+                />
+                <span aria-hidden="true" />
+                <b>Mostrar Subtotal e IGV 18% en PDF</b>
+              </label>
+            </div>
+
             <div className="quotation-products-header">
               <h2>Productos</h2>
               <div className="quotation-product-actions">
@@ -1005,7 +1077,7 @@ const enviarCotizacion = async (cot) => {
                   <strong className="quotation-item-subtotal">
                     <span>Subtotal</span>
                     <b>
-                      S/{" "}
+                      {simboloMoneda}{" "}
                       {(
                         Number(item.cantidad || 0) *
                         Number(item.precioUnitario || 0)
@@ -1052,17 +1124,17 @@ const enviarCotizacion = async (cot) => {
 
             <div className="quotation-total-line">
               <span>Subtotal</span>
-              <strong>S/ {subtotal.toFixed(2)}</strong>
+              <strong>{simboloMoneda} {subtotal.toFixed(2)}</strong>
             </div>
 
             <div className="quotation-total-line">
               <span>IGV 18%</span>
-              <strong>S/ {igv.toFixed(2)}</strong>
+              <strong>{simboloMoneda} {igv.toFixed(2)}</strong>
             </div>
 
             <div className="quotation-total-main">
               <span>Total</span>
-              <strong>S/ {total.toFixed(2)}</strong>
+              <strong>{simboloMoneda} {total.toFixed(2)}</strong>
             </div>
 
             <p>
@@ -1188,7 +1260,7 @@ const enviarCotizacion = async (cot) => {
       <div className="quotation-list-side">
         <div className="quotation-total-box">
           <small>Total</small>
-          <b>S/ {Number(cot.total || 0).toFixed(2)}</b>
+          <b>{obtenerSimboloMoneda(cot.moneda)} {Number(cot.total || 0).toFixed(2)}</b>
         </div>
 
         <div className="quotation-list-actions">
