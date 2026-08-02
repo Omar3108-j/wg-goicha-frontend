@@ -1920,7 +1920,7 @@
 /* Mobile product modal close position V1 */
 @media (max-width: 760px) {
   .product-modal__close {
-    top: calc(92px + env(safe-area-inset-top));
+    top: calc(64px + env(safe-area-inset-top));
     right: 14px;
     z-index: 2140;
   }

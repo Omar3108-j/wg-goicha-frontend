@@ -37,8 +37,11 @@ const opcionesPdfVacias = {
 const itemVacio = {
   descripcion: "",
   cantidad: 1,
-  precioUnitario: 0,
+  precioUnitario: "",
 }
+
+/* Clean new quotation form V1 */
+const crearItemVacio = () => ({ ...itemVacio })
 
 const obtenerSimboloMoneda = (moneda) => (moneda === "USD" ? "US$" : "S/")
 
@@ -112,7 +115,7 @@ function AdminQuotations() {
   const [items, setItems] = useState(() =>
     Array.isArray(borradorInicial?.items) && borradorInicial.items.length
       ? borradorInicial.items
-      : [{ ...itemVacio }]
+      : [crearItemVacio()]
   )
 
   const cargarCotizaciones = async () => {
@@ -204,7 +207,7 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
     localStorage.removeItem(QUOTATION_DRAFT_KEY)
     setCliente({ ...clienteVacio })
     setOpcionesPdf({ ...opcionesPdfVacias })
-    setItems([{ ...itemVacio }])
+    setItems([crearItemVacio()])
     setCotizacionEditandoId(null)
     setModoDuplicado(false)
     setAvisoBorrador("Borrador limpiado")
@@ -272,7 +275,7 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   }
 
   const agregarItem = () => {
-    setItems((prev) => [...prev, { ...itemVacio }])
+    setItems((prev) => [...prev, crearItemVacio()])
   }
 
   /* Excel-like navigation V2 */
@@ -376,7 +379,11 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
   )
 
   const quitarItem = (index) => {
-    if (items.length === 1) return
+    if (items.length === 1) {
+      setItems([crearItemVacio()])
+      setSugerencias({})
+      return
+    }
     setItems(items.filter((_, i) => i !== index))
   }
 
@@ -428,9 +435,7 @@ const editarCotizacion = (cot) => {
         }))
       : [
           {
-            descripcion: "",
-            cantidad: 1,
-            precioUnitario: 0,
+            ...crearItemVacio(),
           },
         ]
   )
@@ -473,9 +478,7 @@ const duplicarCotizacion = (cot) => {
         }))
       : [
           {
-            descripcion: "",
-            cantidad: 1,
-            precioUnitario: 0,
+            ...crearItemVacio(),
           },
         ]
   )
@@ -509,17 +512,21 @@ const cancelarEdicion = () => {
 
   setItems([
     {
-      descripcion: "",
-      cantidad: 1,
-      precioUnitario: 0,
+      ...crearItemVacio(),
     },
   ])
 }
 
 const nuevaCotizacion = () => {
+  localStorage.removeItem(QUOTATION_DRAFT_KEY)
   setCotizacionEditandoId(null)
   setModoDuplicado(false)
+  setCliente({ ...clienteVacio })
+  setItems([crearItemVacio()])
   setOpcionesPdf({ ...opcionesPdfVacias })
+  setSugerencias({})
+  setCustomerMoreOpen(false)
+  setAvisoBorrador("")
   setMostrarFormulario(true)
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
@@ -782,9 +789,7 @@ const enviarCotizacion = async (cot) => {
 
       setItems([
         {
-          descripcion: "",
-          cantidad: 1,
-          precioUnitario: 0,
+          ...crearItemVacio(),
         },
       ])
 
@@ -1102,6 +1107,11 @@ const enviarCotizacion = async (cot) => {
                       value={item.precioUnitario}
                       min="0"
                       step="0.01"
+                      onFocus={() => {
+                        if (Number(item.precioUnitario || 0) === 0) {
+                          handleItemChange(index, "precioUnitario", "")
+                        }
+                      }}
                       onKeyDown={(event) =>
                         handleItemNavigation(event, index, "precioUnitario")
                       }
