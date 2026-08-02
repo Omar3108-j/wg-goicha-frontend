@@ -42,6 +42,15 @@ const itemVacio = {
 
 const obtenerSimboloMoneda = (moneda) => (moneda === "USD" ? "US$" : "S/")
 
+/* Catalog quotation items V1 */
+const normalizarTextoBusqueda = (valor) =>
+  String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+
 const leerBorradorCotizacion = () => {
   try {
     const borrador = localStorage.getItem(QUOTATION_DRAFT_KEY)
@@ -76,6 +85,7 @@ function AdminQuotations() {
   /* Quotation pagination V2 */
   const [cotizacionesPorPagina, setCotizacionesPorPagina] = useState(10)
   const [paginaCotizaciones, setPaginaCotizaciones] = useState(1)
+  const [productosCatalogo, setProductosCatalogo] = useState([])
   const [sugerencias, setSugerencias] = useState({})
   const [importOpen, setImportOpen] = useState(false)
   const [textoImportacion, setTextoImportacion] = useState("")
@@ -130,6 +140,19 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
     }
 
     cargarCotizacionesIniciales()
+  }, [])
+
+  useEffect(() => {
+    const cargarProductosCatalogo = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/productos/catalogo`)
+        setProductosCatalogo(Array.isArray(res.data) ? res.data : [])
+      } catch (error) {
+        console.error("Error cargando productos del catálogo:", error)
+      }
+    }
+
+    cargarProductosCatalogo()
   }, [])
 
   useEffect(() => {
@@ -203,27 +226,43 @@ setCotizaciones(Array.isArray(res.data) ? res.data : [])
     }))
   }
 
-  const buscarProductosInternos = async (index, texto) => {
+  const buscarProductosCatalogo = (index, texto) => {
   if (!texto || texto.length < 3) {
-    setSugerencias({
-      ...sugerencias,
-      [index]: [],
-    })
+    setSugerencias({})
     return
   }
 
-  try {
-    const res = await axios.get(
-      `${API_URL}/api/productos-internos?buscar=${encodeURIComponent(texto)}`
-    )
+  const textoNormalizado = normalizarTextoBusqueda(texto)
+  const sugerenciasCatalogo = productosCatalogo
+    .flatMap((producto) => {
+      const variantes = Array.isArray(producto.variantesActivas)
+        ? producto.variantesActivas
+        : []
 
-    setSugerencias({
-      ...sugerencias,
-      [index]: res.data.slice(0, 8),
+      if (variantes.length > 0) {
+        return variantes.map((variante) => ({
+          id: `variante-${variante.id}`,
+          nombre: `${producto.nombre} - ${variante.nombre}`,
+          precio: variante.precio || producto.precioMinimo || producto.precio || 0,
+        }))
+      }
+
+      return [
+        {
+          id: `producto-${producto.id}`,
+          nombre: producto.nombre,
+          precio: producto.precio || producto.precioMinimo || 0,
+        },
+      ]
     })
-  } catch (error) {
-    console.error("Error buscando productos internos:", error)
-  }
+    .filter((producto) =>
+      normalizarTextoBusqueda(producto.nombre).includes(textoNormalizado)
+    )
+    .slice(0, 8)
+
+  setSugerencias({
+    [index]: sugerenciasCatalogo,
+  })
 }
 
   const handleItemChange = (index, field, value) => {
@@ -1002,9 +1041,12 @@ const enviarCotizacion = async (cot) => {
     onKeyDown={(event) =>
       handleItemNavigation(event, index, "descripcion")
     }
+    onBlur={() => {
+      window.setTimeout(() => setSugerencias({}), 160)
+    }}
     onChange={(e) => {
       handleItemChange(index, "descripcion", e.target.value)
-      buscarProductosInternos(index, e.target.value)
+      buscarProductosCatalogo(index, e.target.value)
     }}
   />
 
@@ -1017,11 +1059,7 @@ const enviarCotizacion = async (cot) => {
           onClick={() => {
             handleItemChange(index, "descripcion", prod.nombre)
             handleItemChange(index, "precioUnitario", prod.precio || 0)
-
-            setSugerencias({
-              ...sugerencias,
-              [index]: [],
-            })
+            setSugerencias({})
           }}
         >
           <span>{prod.nombre}</span>

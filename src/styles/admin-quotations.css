@@ -1912,6 +1912,8 @@
 
 .quotation-total-main {
   flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 10px;
 }
 
 .quotation-total-main span {
@@ -1931,9 +1933,10 @@
 
 .quotation-total-main strong,
 .quotation-total-main strong:last-child {
-  flex: 1 1 160px;
-  font-size: clamp(22px, 3vw, 32px);
+  flex: 1 1 100%;
+  font-size: clamp(24px, 3vw, 32px) !important;
   line-height: 1.08;
+  white-space: normal !important;
 }
 
 @media (max-width: 700px) {
@@ -1944,8 +1947,27 @@
 
   .quotation-total-main strong,
   .quotation-total-main strong:last-child {
-    flex-basis: 130px;
+    flex-basis: 100%;
     max-width: 100%;
     font-size: clamp(18px, 6vw, 24px) !important;
   }
+}
+
+/* Internal product suggestions layering V1 */
+.quotation-items {
+  overflow: visible !important;
+}
+
+.quotation-item-row:focus-within {
+  position: relative;
+  z-index: 100000;
+}
+
+.quotation-item-row:has(.quotation-suggestions) {
+  position: relative;
+  z-index: 100000;
+}
+
+.quotation-suggestions {
+  z-index: 100001;
 }
