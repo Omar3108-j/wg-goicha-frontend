@@ -5,6 +5,7 @@ import AdminModuleFormHeader from "../../components/admin/AdminModuleFormHeader"
 import AdminPagination from "../../components/admin/AdminPagination"
 import { API_URL } from "../../config/api"
 import { useAdminNotifications } from "../../components/admin/useAdminNotifications"
+import { getAdminUser } from "../../utils/adminSession"
 import {
   ChevronDown,
   FileText,
@@ -67,6 +68,11 @@ const leerBorradorCotizacion = () => {
 
 function AdminQuotations() {
   const { showToast } = useAdminNotifications()
+  const adminUser = getAdminUser()
+  const empresaAdmin =
+    adminUser?.empresa?.razonSocial ||
+    adminUser?.empresa?.nombreComercial ||
+    "W&G Corporación Goicha E.I.R.L."
   /* Excel-like quotation rows V1 */
   const itemInputRefs = useRef({
     descripcion: [],
@@ -696,14 +702,18 @@ const cambiarEstadoCotizacion = async (cot, nuevoEstado) => {
 const obtenerUrlPdfCotizacion = (cotizacionId) =>
   `${API_URL}/api/cotizaciones/${cotizacionId}/pdf`
 
-const descargarPdfCotizacion = (cotizacionId) => {
-  const descarga = document.createElement("iframe")
-  descarga.src = obtenerUrlPdfCotizacion(cotizacionId)
-  descarga.title = "Descarga de cotización"
-  descarga.style.display = "none"
+const descargarPdfCotizacion = async (cotizacionId, codigo = "cotizacion") => {
+  const respuesta = await axios.get(obtenerUrlPdfCotizacion(cotizacionId), {
+    responseType: "blob",
+  })
+  const url = window.URL.createObjectURL(new Blob([respuesta.data], { type: "application/pdf" }))
+  const descarga = document.createElement("a")
+  descarga.href = url
+  descarga.download = `${codigo}.pdf`
   document.body.appendChild(descarga)
-
-  window.setTimeout(() => descarga.remove(), 60000)
+  descarga.click()
+  descarga.remove()
+  window.setTimeout(() => window.URL.revokeObjectURL(url), 1000)
 }
 
 /* Quotation WhatsApp message cleanup V1 */
@@ -711,16 +721,23 @@ const enviarCotizacion = async (cot) => {
   const codigo =
     cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
   const mensaje = [ `Hola *${cot.cliente || ""}* 👋`,
-    "", `Te compartimos la cotización *${codigo}* preparada por *W&G Corporación Goicha E.I.R.L.*`,
+    "", `Te compartimos la cotización *${codigo}* preparada por *${empresaAdmin}*`,
     "", `💰 *Total cotizado:* ${obtenerSimboloMoneda(cot.moneda)} ${Number(cot.total || 0).toFixed(2)}`, "",
     "En el archivo adjunto encontrarás el detalle completo de la cotización.",
     "",
     "Quedamos atentos a cualquier consulta o a tu confirmación para coordinar tu pedido.",
     "", "Saludos cordiales,",
-    "*Equipo W&G Corporación Goicha E.I.R.L.*"
+    `*Equipo ${empresaAdmin}*`
   ].join("\n")
 
-  descargarPdfCotizacion(cot.id)
+  try {
+    await descargarPdfCotizacion(cot.id, codigo)
+  } catch (error) {
+    console.error("Error descargando PDF de cotización:", error)
+    showToast("No se pudo descargar el PDF", "error")
+    return
+  }
+
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`
   const whatsappWindow = window.open(whatsappUrl, "_blank")
 
@@ -1312,14 +1329,21 @@ const enviarCotizacion = async (cot) => {
         </div>
 
         <div className="quotation-list-actions">
-          <a
-            href={obtenerUrlPdfCotizacion(cot.id)}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
             className="quotation-pdf-button"
+            onClick={() =>
+              descargarPdfCotizacion(
+                cot.id,
+                cot.codigo || `COT-${String(cot.id).padStart(5, "0")}`
+              ).catch((error) => {
+                console.error("Error descargando PDF de cotización:", error)
+                showToast("No se pudo descargar el PDF", "error")
+              })
+            }
           >
             PDF
-          </a>
+          </button>
 
           <button
             className="quotation-whatsapp-button"

@@ -1,3 +1,5 @@
+import axios from "axios";
+
 export const RAW_API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 const normalizeSameDomainApiUrl = (url) => {
@@ -31,6 +33,24 @@ const normalizeSameDomainApiUrl = (url) => {
 
 /* Same-domain API URL normalization V1 */
 export const API_URL = normalizeSameDomainApiUrl(RAW_API_URL);
+
+/* Backend admin JWT auth V1 */
+const ADMIN_TOKEN_KEY = "wg-admin-token";
+
+if (!axios.defaults.__wgAdminAuthInterceptor) {
+  axios.interceptors.request.use((config) => {
+    const token = localStorage.getItem(ADMIN_TOKEN_KEY);
+
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+  });
+
+  axios.defaults.__wgAdminAuthInterceptor = true;
+}
 
 /* Backend asset URL normalization V1 */
 export const resolveAssetUrl = (url) => {

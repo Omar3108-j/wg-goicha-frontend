@@ -1,0 +1,248 @@
+/* Stage 4 own company settings V1 */
+.admin-company-settings {
+  width: min(1280px, 100%);
+  margin: 0 auto;
+}
+
+.admin-company-settings__hero,
+.admin-company-card {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
+}
+
+.admin-company-settings__hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 36px 42px;
+  margin-bottom: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(239, 68, 68, 0.16), transparent 32%),
+    linear-gradient(135deg, #0f172a, #111827);
+  color: #fff;
+}
+
+.admin-company-settings__hero h1 {
+  margin: 8px 0;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  letter-spacing: -0.05em;
+}
+
+.admin-company-settings__hero p {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.78);
+  font-weight: 800;
+}
+
+.admin-company-settings__code {
+  min-width: 130px;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.1);
+  text-align: center;
+}
+
+.admin-company-settings__code small,
+.admin-company-logo span,
+.admin-company-card label span {
+  display: block;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-company-settings__code strong {
+  display: block;
+  margin-top: 6px;
+  color: #22c55e;
+  font-size: 1.5rem;
+}
+
+.admin-company-card {
+  padding: 34px;
+}
+
+/* Company website settings V1 */
+.admin-company-section {
+  padding: 22px;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.admin-company-section + .admin-company-section {
+  margin-top: 20px;
+}
+
+.admin-company-section__heading {
+  margin-bottom: 18px;
+}
+
+.admin-company-section__heading h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.admin-company-section__heading p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.admin-company-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-company-card input,
+.admin-company-card select,
+.admin-company-card textarea {
+  width: 100%;
+  margin-top: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.admin-company-card textarea {
+  resize: vertical;
+}
+
+.admin-company-card input:focus,
+.admin-company-card select:focus,
+.admin-company-card textarea:focus {
+  border-color: #ef4444;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+.admin-company-field-full,
+.admin-company-logo {
+  display: block;
+  margin-top: 20px;
+}
+
+.admin-company-logo {
+  display: grid;
+  grid-template-columns: 1.2fr 180px 160px;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  background: #f8fafc;
+}
+
+.admin-company-logo p {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+.admin-company-logo__preview {
+  display: grid;
+  place-items: center;
+  min-height: 92px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px dashed #cbd5e1;
+  overflow: hidden;
+}
+
+.admin-company-logo__preview img {
+  max-width: 145px;
+  max-height: 76px;
+  object-fit: contain;
+}
+
+.admin-company-logo__upload {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 16px 34px rgba(239, 68, 68, 0.28);
+}
+
+.admin-company-logo__upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.admin-company-logo > input {
+  grid-column: 1 / -1;
+  margin-top: 0;
+}
+
+.admin-company-save {
+  width: 100%;
+  margin-top: 26px;
+  border: 0;
+  border-radius: 18px;
+  padding: 16px 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  font-weight: 950;
+  cursor: pointer;
+  box-shadow: 0 18px 38px rgba(239, 68, 68, 0.28);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.admin-company-save:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 44px rgba(239, 68, 68, 0.34);
+}
+
+.admin-company-save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .admin-company-settings__hero,
+  .admin-company-card {
+    border-radius: 22px;
+    padding: 24px 18px;
+  }
+
+  .admin-company-section {
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .admin-company-settings__hero,
+  .admin-company-grid,
+  .admin-company-logo {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-company-settings__hero {
+    display: grid;
+  }
+}
+

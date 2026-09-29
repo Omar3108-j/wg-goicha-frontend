@@ -13,6 +13,7 @@ import AddProduct from "./pages/admin/AddProduct"
 import EditProduct from "./pages/admin/EditProduct"
 import AdminOrders from "./pages/admin/AdminOrders"
 import AdminQuotations from "./pages/admin/AdminQuotations"
+import AdminCompanySettings from "./pages/admin/AdminCompanySettings"
 import CategoriasAdmin from "./components/admin/CategoriasAdmin"
 import AdminVariantes from "./pages/admin/AdminVariantes"
 
@@ -35,6 +36,7 @@ function App() {
           <Route path="/admin/productos/editar/:id"element={<ProtectedRoute><EditProduct /></ProtectedRoute>}/>
           <Route path="/admin/pedidos"element={<ProtectedRoute><AdminOrders /></ProtectedRoute>}/>
           <Route path="/admin/cotizaciones"element={<ProtectedRoute><AdminQuotations/></ProtectedRoute>}/>
+          <Route path="/admin/configuracion/empresa"element={<ProtectedRoute><AdminCompanySettings /></ProtectedRoute>}/>
           <Route path="/admin/productos/:id/variantes" element={<ProtectedRoute><AdminVariantes /></ProtectedRoute>}/>
         </Routes>
       </AdminNotificationsProvider>

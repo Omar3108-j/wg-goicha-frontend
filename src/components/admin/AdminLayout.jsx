@@ -1,17 +1,46 @@
 import { useState } from "react"
 import { NavLink, Link, useNavigate } from "react-router-dom"
+import { clearAdminSession, getAdminUser } from "../../utils/adminSession"
 
 function AdminLayout({ children }) {
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [logoErrorUrls, setLogoErrorUrls] = useState([])
+  const adminUser = getAdminUser()
+  const empresa = adminUser?.empresa
+  const empresaNombre = empresa?.nombreComercial || "Panel administrador"
+  const empresaCodigo = empresa?.codigo || ""
+  const logoCandidates = {
+    WG: ["/logo-dark.png"],
+    GI: ["/logo-gi-dark.png"],
+  }[empresaCodigo] || []
+  const logoActual = logoCandidates.find((logoUrl) => !logoErrorUrls.includes(logoUrl))
+  const mostrarLogo = Boolean(logoActual)
 
   const cerrarSidebar = () => setSidebarOpen(false)
 
   const cerrarSesion = () => {
-    /* Admin session per browser session V1 */
-    sessionStorage.removeItem("adminAuth")
-    localStorage.removeItem("adminAuth")
+    clearAdminSession()
     navigate("/admin/login")
+  }
+
+  const obtenerInicialesEmpresa = () => {
+    const fuente = empresaNombre || empresaCodigo || "Admin"
+    return fuente
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((parte) => parte[0])
+      .join("")
+      .toUpperCase()
+  }
+
+  const registrarErrorLogo = (logoUrl) => {
+    setLogoErrorUrls((logosFallidos) =>
+      logosFallidos.includes(logoUrl)
+        ? logosFallidos
+        : [...logosFallidos, logoUrl]
+    )
   }
 
   return (
@@ -24,7 +53,17 @@ function AdminLayout({ children }) {
           onClick={cerrarSidebar}
         >
           <span className="admin-mobile-header__logo">
-            <img src="/logo-dark.png" alt="W&G Corporación Goicha" />
+            {mostrarLogo ? (
+              <img
+                src={logoActual}
+                alt={empresaNombre}
+                onError={() => registrarErrorLogo(logoActual)}
+              />
+            ) : (
+              <span className="admin-company-logo-fallback">
+                {obtenerInicialesEmpresa()}
+              </span>
+            )}
           </span>
         </Link>
 
@@ -58,7 +97,17 @@ function AdminLayout({ children }) {
         <div>
           <div className="admin-sidebar__brand">
             <div className="admin-sidebar__logo">
-              <img src="/logo-dark.png" alt="W&G Corporación Goicha" />
+              {mostrarLogo ? (
+                <img
+                  src={logoActual}
+                  alt={empresaNombre}
+                  onError={() => registrarErrorLogo(logoActual)}
+                />
+              ) : (
+                <span className="admin-company-logo-fallback">
+                  {obtenerInicialesEmpresa()}
+                </span>
+              )}
             </div>
           </div>
 
@@ -86,6 +135,11 @@ function AdminLayout({ children }) {
 <NavLink to="/admin/cotizaciones" onClick={cerrarSidebar}>
   <span className="admin-nav-icon">💎</span>
   Cotizaciones
+</NavLink>
+
+<NavLink to="/admin/configuracion/empresa" onClick={cerrarSidebar}>
+  <span className="admin-nav-icon">⚙️</span>
+  Mi empresa
 </NavLink>
           </nav>
         </div>

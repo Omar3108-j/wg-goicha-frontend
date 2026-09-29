@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { loginAdmin } from "../../utils/adminSession"
 
 function AdminLogin() {
   const navigate = useNavigate()
@@ -7,6 +8,8 @@ function AdminLogin() {
     usuario: "",
     password: "",
   })
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
     setForm({
@@ -15,20 +18,23 @@ function AdminLogin() {
     })
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError("")
+    setLoading(true)
 
-    if (
-  form.usuario.trim().toLowerCase() === "gloria" &&
-  form.password === "loreto159"
-) {
-  /* Admin session per browser session V1 */
-  localStorage.removeItem("adminAuth")
-  sessionStorage.setItem("adminAuth", "true")
-  navigate("/admin/productos")
-} else {
-  alert("Credenciales incorrectas")
-}
+    try {
+      await loginAdmin({
+        username: form.usuario,
+        password: form.password,
+      })
+      navigate("/admin/productos")
+    } catch (error) {
+      console.error("Error iniciando sesión:", error)
+      setError("Usuario o contraseña incorrectos")
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -65,8 +71,10 @@ function AdminLogin() {
           </div>
 
           <button className="save-button" type="submit">
-            Iniciar sesión
+            {loading ? "Ingresando..." : "Iniciar sesión"}
           </button>
+
+          {error && <p className="admin-login-error">{error}</p>}
         </form>
       </div>
     </div>
